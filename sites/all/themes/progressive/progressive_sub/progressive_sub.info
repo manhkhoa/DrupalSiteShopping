@@ -1,0 +1,51 @@
+name = Progressive SubTheme
+description = Progressive is Responsive Drupal 7 Theme.
+core = 7.x
+engine = phptemplate
+
+base theme = progressive
+
+regions[top]                = Top
+regions[content_top]        = Content Top
+regions[content]            = Content
+regions[sidebar]            = Sidebar
+regions[bottom]             = Content Bottom
+regions[footer]             = Footer
+
+;stylesheets[all][] = css/custom.css
+
+features[] = name
+features[] = logo
+features[] = slogan
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = comment_user_verification
+features[] = favicon
+features[] = main_menu
+
+settings[toggle_name] = 1
+settings[toggle_logo] = 1
+settings[toggle_slogan] = 1
+settings[toggle_node_user_picture] = 1
+settings[toggle_comment_user_picture] = 1
+settings[toggle_comment_user_verification] = 1
+settings[toggle_favicon] = 1
+settings[toggle_main_menu] = 1
+
+settings[phones] = +0123456789
+settings[boxed] = 0
+settings[mobile_menu_toggle] = 0
+settings[shop_link] = shop
+settings[shop_link_list] = shop-list
+settings[header_top_menu] = 1
+settings[language] = 1
+settings[account_login] = 1
+settings[wishlist] = 1
+settings[comparelist] = 1
+settings[cart_checkout] = 1
+settings[skin] = home
+settings[page_404] = 3
+
+version = "7.x-1.4"
+core = "7.x"
+project = "progressive"

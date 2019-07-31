@@ -1,0 +1,9 @@
+name = NikaDevs Main Functions
+description = All required functions for NikaDevs themes.
+package = "NikaDevs"                                                        
+core = 7.x
+dependencies[] = filter
+dependencies[] = shortcode
+version = "7.x-1.2"
+core = "7.x"
+project = "NikaDevs"

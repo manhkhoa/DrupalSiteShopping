@@ -1,0 +1,1094 @@
+<?php
+
+/**
+ * Implementation of hook_menu().
+ */
+function nd_visualshortcodes_menu() {
+  $items = array();
+
+  $items['admin/config/content/nd_visualshortcodes'] = array(
+    'title' => 'ND Visual Shortcodes',
+    'description' => 'Configure the Nikadevs Visual Shortcodes editor.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('nd_visualshortcodes_admin_main'),
+    'access arguments' => array('administer nd visualshortcodes'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['ajax/nd_visualshortcodes/ajax_backend_layout'] = array(
+    'page callback' => 'nd_visualshortcodes_ajax_backend_layout',
+    'access arguments' => array('use nd visualshortcodes'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['ajax/nd_visualshortcodes/ajax_backend_shortcode_preview'] = array(
+    'page callback' => 'nd_visualshortcodes_ajax_backend_shortcode_preview',
+    'access arguments' => array('use nd visualshortcodes'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin_ajax/nd_visualshortcodes/ajax_backend_shortcode'] = array(
+    'page callback' => 'nd_visualshortcodes_ajax_backend_shortcode',
+    'access arguments' => array('use nd visualshortcodes'),
+    'type' => MENU_CALLBACK,
+    'delivery callback' => 'ajax_deliver',
+  );
+  $items['ajax/nd_visualshortcodes/shortcodes_list_add'] = array(
+    'page callback' => 'nd_visualshortcodes_ajax_shortcodes_list_add',
+    'access arguments' => array('use nd visualshortcodes'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['ajax/nd_visualshortcodes/shortcodes_list'] = array(
+    'page callback' => 'nd_visualshortcodes_ajax_shortcodes_list',
+    'access arguments' => array('use nd visualshortcodes'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/ajax/nd_visualshortcodes/icons_autocomplete'] = array(
+    'page callback' => 'nd_visualshortcodes_ajax_icons_autocomplete',
+    'access arguments' => array('use nd visualshortcodes'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/ajax/nd_visualshortcodes/node_autocomplete'] = array(
+    'page callback' => 'nd_visualshortcodes_ajax_node_autocomplete',
+    'access arguments' => array('use nd visualshortcodes'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_permission().
+ */
+function nd_visualshortcodes_permission() {
+  $arr = array();
+  $arr['administer nd visualshortcodes'] = array(
+    'title' => t('Customize ND Visual Shortcodes appearance'),
+    'description' => t('Allow users to customize ND Visual Shortcodes appearance.')
+  );
+  $arr['use nd visualshortcodes'] = array(
+    'title' => t('Use ND Visual Shortcodes'),
+    'description' => t('Allow users to use ND Visual Shortcodes.')
+  );
+  return $arr;
+}
+
+function nd_visualshortcodes_admin_main($form, &$form_state) {
+  $settings = variable_get('nd_visualshortcodes', array());
+  $form['nd_visualshortcodes'] = array(
+    '#tree' => TRUE,
+  );
+  $form['nd_visualshortcodes']['autostart'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Autostart Visual Shortcodes editor'),
+    '#default_value' => isset($settings['autostart']) ? $settings['autostart'] : 1,
+  );
+  $form['nd_visualshortcodes']['confirm_delete'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Confirm to delete shortcode'),
+    '#default_value' => isset($settings['confirm_delete']) ? $settings['confirm_delete'] : 0
+  );
+  $formats = array();
+  foreach(filter_formats() as $format) {
+    $formats[$format->format] = $format->name;
+  }
+  $form['nd_visualshortcodes']['formats'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Enable for next Text Formats'),
+    '#options' => $formats,
+    '#default_value' => isset($settings['formats']) ? $settings['formats'] : array()
+  );
+  $form['nd_visualshortcodes_html_default_format'] = array(
+    '#type' => 'select',
+    '#title' => t('Default HTML tag Format'),
+    '#options' => $formats,
+    '#default_value' => variable_get('nd_visualshortcodes_html_default_format', NULL)
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implementation of hook_element_info_alter().
+ */
+function nd_visualshortcodes_element_info_alter(&$types) {
+  $types['text_format']['#pre_render'][] = 'nd_visualshortcodes_pre_render_text_format';
+}
+
+/**
+ * This function creates the HTML objects required for nd_visualshortcodes.
+ *
+ * @param $element
+ *   A fully populated form element to add the editor to.
+ * @return
+ *   The same $element with extra nd_visualshortcodes markup and initialization.
+ */
+function nd_visualshortcodes_pre_render_text_format($element) {
+  static $init = FALSE;
+  if (!isset($element['#format'])) {
+    return $element;
+  }
+
+  if ($init === FALSE) {
+    drupal_add_js(array('nd_visualshortcodes' => variable_get('nd_visualshortcodes', array())), 'setting');
+    $init = TRUE;
+  }
+
+  if (isset($element['value'])) {
+    if (!isset($element['format'])) {
+      return $element;
+    }
+    if (isset($element['summary']) && $element['summary']['#type'] == 'textarea') {
+      $element['value'] = nd_visualshortcodes_load_field($element['value'], $element['format']['format'], TRUE, $element['summary']['#id']);
+      $element['summary'] = nd_visualshortcodes_load_field($element['summary'], $element['format']['format'], FALSE);
+    }
+    else {
+      $element['value'] = nd_visualshortcodes_load_field($element['value'], $element['format']['format']);
+    }
+  }
+  else {
+    $element = nd_visualshortcodes_load_field($element, $element['#format']);
+  }
+  return $element;
+}
+
+function nd_visualshortcodes_load_field($field, $format, $show_toggle = TRUE, $add_fields_to_toggle = FALSE) {
+  global $theme;
+  static $processed_ids = array();
+  $use_ckeditor = FALSE;
+  $format_arr = FALSE;
+
+  if (is_array($format)) {
+    $format_arr = $format;
+    $format = isset($format_arr['#value']) ? $format_arr['#value'] : $format_arr['#default_value'];
+  }
+
+  if (!isset($field['#id'])) {
+    return $field;
+  }
+
+  if (isset($processed_ids[$field['#id']])) {
+    return $field;
+  }
+
+  if (key_exists('#nd_visualshortcodes', $field) && !$field['#nd_visualshortcodes']) {
+    return $field;
+  }
+
+  if (isset($field['#access']) && !$field['#access']) {
+    return $field;
+  }
+
+  if ($field['#id'] == "edit-log") {
+    return $field;
+  }
+
+  if (isset($field['#attributes']['disabled']) && $field['#attributes']['disabled'] == 'disabled') {
+    return $field;
+  }
+
+  if(empty($processed_ids)) {
+    // Attach the editor css.
+    $field['#attached']['css'][] = drupal_get_path('module', 'nikadevs_cms') . '/css/font-awesome-4.1.0/css/font-awesome.css';
+    $field['#attached']['css'][] = drupal_get_path('module', 'nikadevs_cms') . '/layout_builder/nikadevs-cms-layout-builder-min-bootstrap.css';
+    $field['#attached']['css'][] = drupal_get_path('module', 'nikadevs_cms') . '/css/jquery.colorpicker.css';
+    $field['#attached']['css'][] = drupal_get_path('module', 'nd_visualshortcodes') . '/css/nd-visualshortcodes.css';
+    $field['#attached']['css'][] = drupal_get_path('module', 'nd_visualshortcodes') . '/css/social-icons.css';
+    if(variable_get('nd_visualshortcodes_extra_css', '')) {
+      $field['#attached']['css'][] = variable_get('nd_visualshortcodes_extra_css', '');
+    }
+
+    drupal_add_js(drupal_get_path('module', 'nikadevs_cms') . '/js/jquery.colorpicker.js');
+    drupal_add_js(drupal_get_path('module', 'nd_visualshortcodes') . '/js/nd_visualshortcodes.js');
+    drupal_add_js(drupal_get_path('module', 'nikadevs_cms') . '/js/jquery-sortable.js');
+    drupal_add_js(drupal_get_path('module', 'nikadevs_cms') . '/js/switchery.js');
+    drupal_add_library('system', 'drupal.vertical-tabs');
+    drupal_add_library('system', 'ui.dialog');
+    drupal_add_library('system', 'drupal.ajax');
+    drupal_add_library('system', 'jquery.form');
+    drupal_add_js('misc/states.js');
+    drupal_add_js('misc/autocomplete.js');
+
+    $libraries = drupal_get_library('media');
+    $field['#attached']['library'][] = array('media', 'media_browser');
+    if (!isset($libraries['media_browser_settings'])) {
+      $settings = array(
+        'browserUrl' => url('media/browser', array(
+            'query' => array(
+              'render' => 'media-popup'
+            ))
+        ),
+        'styleSelectorUrl' => url('media/-media_id-/format-form', array(
+            'query' => array(
+              'render' => 'media-popup'
+            ))
+        ),
+        'dialogOptions' => array(
+          'dialogclass' => variable_get('media_dialogclass', 'media-wrapper'),
+          'modal' => (boolean)variable_get('media_modal', TRUE),
+          'draggable' => (boolean)variable_get('media_draggable', FALSE),
+          'resizable' => (boolean)variable_get('media_resizable', FALSE),
+          'minwidth' => (int)variable_get('media_minwidth', 500),
+          'width' => (int)variable_get('media_width', 670),
+          'height' => (int)variable_get('media_height', 280),
+          'position' => variable_get('media_position', 'center'),
+          'overlay' => array(
+            'backgroundcolor' => variable_get('media_backgroundcolor', '#000000'),
+            'opacity' => (float)variable_get('media_opacity', 0.4),
+          ),
+          'zindex' => (int)variable_get('media_zindex', 10000),
+        ),
+      );
+      $field['#attached']['js'][] = array(
+        'data' => array('media' => $settings),
+        'type' => 'setting',
+      );
+    }
+    else {
+      $field['#attached']['library'][] = array('media', 'media_browser_settings');
+    }
+
+  }
+
+  if (!isset($processed_ids[$field['#id']])) {
+    $processed_ids[$field['#id']] = array();
+  }
+
+  $textarea_id = $field['#id'];
+
+  $class[] = 'ckeditor-mod';
+  $_ckeditor_ids[] = $textarea_id;
+
+  $prefix = '<div class = "nd_visualshortcodes_links_wrap"><a class="nd_visualshortcodes_links btn btn-info btn-sm" href="#" data-disable-text = "' . str_replace("'", '"', t('Disable Visual Shortcodes')) . '" data-enable-text = "' . str_replace("'", '"', t('Enable Visual Shortcodes')) . '" data-id="' . $textarea_id . '" data-format = "' . $format . '">';
+  $prefix .= t('Loading...');
+  $prefix .= '</a><i class="fa fa-spinner fa-spin"></i></div>';
+
+  $field['#prefix'] = (isset($field['#prefix']) ? $field['#prefix'] : '') . $prefix;
+
+  return $field;
+}
+
+/**
+ * Return array with region ID and his HTML class name
+*/
+function nd_visualshortcodes_theme() {
+  return array(
+    'nd_visualshortcodes' => array(
+      'variables' => array(
+        'output' => '',
+        'live_preview' => ''
+      ),
+      'template' => 'nd-visualshortcodes',
+    ),
+  );
+}
+
+/**
+ * Implements hook_custom_theme().
+ */
+function nd_visualshortcodes_custom_theme() {
+  // Allow the user to login with default theme
+  if (arg(0) == 'admin_ajax') {
+    $admin_theme = variable_get('admin_theme', 0);
+    return $admin_theme;
+  }
+}
+
+function nd_visualshortcodes_ajax_backend_layout() {
+  if(!isset($_POST['code'])) {
+    drupal_exit();
+  }
+  //print '<pre>';  print_r($_POST);  print '</pre>';
+  $shortcodes = nd_visualshortcodes_process_shortcodes($_POST['code'], $_POST['format']);
+  $settings = variable_get('nd_visualshortcodes', array());
+  $live_preview = isset($settings['live_preview']) && $settings['live_preview'] ? ' nd-live-preview' : '';
+  $output = theme('nd_visualshortcodes', array('output' => $shortcodes, 'live_preview' => $live_preview));
+  print $output;
+  drupal_exit();
+}
+
+function nd_visualshortcodes_ajax_backend_shortcode_preview() {
+  $settings = variable_get('nd_visualshortcodes', array());
+  if(!isset($_POST['shortcode'])) {
+    drupal_exit();
+  }
+  $el = $_POST['shortcode'];
+  $attrs = $_POST['attrs'];
+  $text = '';
+  foreach($attrs as $name => $value) {
+    if(!$value) {
+      unset($attrs[$name]);
+    }
+    if(strpos($name, '[format') !== FALSE) {
+      $attrs['format'] = $value;
+    }
+    if(strpos($name, '[value') !== FALSE) {
+      $text = $value;
+    }
+  }
+  $preview = nd_visualshortcodes_preview($el, $attrs, $text);
+  $preview = '<div class = "nd_backend_preview">' . $preview . '</div>';
+  print $preview;
+  drupal_exit();
+}
+
+function nd_visualshortcodes_ajax_backend_shortcode() {
+  if(!isset($_POST['shortcode'])) {
+    drupal_exit();
+  }
+  $build = drupal_get_form('nd_visualshortcodes_ajax_backend_shortcode_form');
+  $form = render($build);
+  $result = array('#type' => 'ajax');
+  $result['#commands'][] = array(
+    'command' => 'shortcode_settings',
+    'method' => NULL,
+    'selector' => '#nd-visualshortcodes-shortcode-settings',
+    'data' => $form,
+  );
+  return $result;
+}
+
+function nd_visualshortcodes_ajax_backend_shortcode_form($form, &$form_state) {
+  $shortcodes = shortcode_list_all();
+  $shortcode = isset($form_state['values']['shortcode_name']) ? $form_state['values']['shortcode_name'] : $_POST['shortcode'];
+  if(!isset($shortcodes[$shortcode]['process settings callback']) && function_exists($shortcodes[$shortcode]['process callback'] . '_settings')) {
+    $shortcodes[$shortcode]['process settings callback'] = $shortcodes[$shortcode]['process callback'] . '_settings';
+  }
+  if(isset($shortcodes[$shortcode]['process settings callback'])) {
+    $callback = isset($shortcodes[$shortcode]['process settings callback']) ? $shortcodes[$shortcode]['process settings callback'] : '';
+    $form['shortcode_name'] = array(
+      '#type' => 'hidden',
+      '#value' => $shortcode
+    );
+    $form['shortcode'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Shortcode'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#group' => 'additional_settings',
+      '#weight' => -5,
+    );
+    $form['shortcode']['settings'] = call_user_func($callback, $_POST['attrs'], isset($_POST['text']) ? $_POST['text'] : '', array(), $form_state);
+  }
+  $attrs = $_POST['attrs'];
+  $form['additional_settings'] = array(
+    '#type' => 'vertical_tabs',
+  );
+
+  $form['paddings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Paddings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'additional_settings',
+    '#weight' => 1,
+  );
+  $form['margings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Margins'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'additional_settings',
+    '#weight' => 2,
+  );
+  $form['classes_animation'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Classes, ID & Other'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'additional_settings',
+    '#weight' => 3,
+  );
+  $form['border_radius'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Border'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'additional_settings',
+    '#weight' => 4,
+  );
+  $form['background'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Background'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#group' => 'additional_settings',
+    '#weight' => 5,
+  );
+
+  $form['paddings']['container'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div class = "row col-settings device-icons-wrap">',
+    '#suffix' => '</div>'
+  );
+  $form['paddings']['container']['style_padding_left'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Padding Left'),
+    '#default_value' => isset($attrs['style_padding_left']) ? $attrs['style_padding_left'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['paddings']['container']['style_padding_right'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Padding Right'),
+    '#default_value' => isset($attrs['style_padding_right']) ? $attrs['style_padding_right'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['paddings']['container']['style_padding_top'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Padding Top'),
+    '#default_value' => isset($attrs['style_padding_top']) ? $attrs['style_padding_top'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['paddings']['container']['style_padding_bottom'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Padding Bottom'),
+    '#default_value' => isset($attrs['style_padding_bottom']) ? $attrs['style_padding_bottom'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+
+  $form['margings']['container'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div class = "row col-settings device-icons-wrap">',
+    '#suffix' => '</div>'
+  );
+  $form['margings']['container']['style_margin_left'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Margin Left'),
+    '#default_value' => isset($attrs['style_margin_left']) ? $attrs['style_margin_left'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['margings']['container']['style_margin_right'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Margin Right'),
+    '#default_value' => isset($attrs['style_margin_right']) ? $attrs['style_margin_right'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['margings']['container']['style_margin_top'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Margin Top'),
+    '#default_value' => isset($attrs['style_margin_top']) ? $attrs['style_margin_top'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['margings']['container']['style_margin_bottom'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Margin Bottom'),
+    '#default_value' => isset($attrs['style_margin_bottom']) ? $attrs['style_margin_bottom'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+
+  $form['classes_animation']['id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('ID'),
+    '#default_value' => isset($attrs['id']) ? $attrs['id'] : '',
+    '#attributes' => array('class' => array('form-control')),
+  );
+  $form['classes_animation']['extra_classes'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Extra Classes'),
+    '#default_value' => isset($attrs['extra_classes']) ? $attrs['extra_classes'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-xs-6">',
+  );
+  $types = array('' => t('Default'), 'left' => t('Left'), 'center' => t('Center'), 'right' => t('Right'));
+  $form['classes_animation']['text_align'] = array(
+    '#type' => 'select',
+    '#title' => t('Text Align'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['text_align']) ? $attrs['text_align'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-xs-6">',
+    '#suffix' => '</div></div>'
+  );
+  $form['classes_animation']['container']['animation'] = array(
+    '#type' => 'select',
+    '#title' => t('Animation'),
+    '#options' => _nd_visualshortcodes_list_animations(),
+    '#default_value' => isset($attrs['animation']) ? $attrs['animation'] : '',
+    '#prefix' => '<div class = "row col-settings"><div class = "col-xs-6 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['classes_animation']['container']['animation_delay'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Animation Delay (ms)'),
+    '#default_value' => isset($attrs['animation_delay']) ? $attrs['animation_delay'] : '',
+    '#prefix' => '<div class = "col-xs-6 centered">',
+    '#suffix' => '</div></div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['classes_animation']['extra_style'] = array(
+    '#type' => 'textarea',
+    '#title' => t('CSS Styles'),
+    '#default_value' => isset($attrs['extra_style']) ? $attrs['extra_style'] : '',
+    '#attributes' => array('class' => array('form-control')),
+  );
+  $fonts = variable_get('nd_visualshortcodes_fonts', array());
+  if (!empty($fonts)) {
+    $form['classes_animation']['font'] = array(
+      '#type' => 'select',
+      '#title' => t('Font'),
+      '#options' => $fonts,
+      '#default_value' => isset($attrs['font']) ? $attrs['font'] : '',
+      '#prefix' => '<div class = "row col-settings"><div class = "col-xs-6 centered">',
+      '#suffix' => '</div>',
+      '#attributes' => array('class' => array('form-control'))
+    );
+  }
+
+  $form['border_radius']['different_values'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Different Border Radius'),
+    '#default_value' => isset($attrs['different_values']) ? $attrs['different_values'] : FALSE,
+    '#attributes' => array('class' => array('nd_visualshortcodes_different_values'))
+  );
+  $form['border_radius']['style_border_radius'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Border Radius'),
+    '#default_value' => isset($attrs['style_border_radius']) ? $attrs['style_border_radius'] : FALSE,
+    '#states' => array(
+      'visible' => array(
+        '.nd_visualshortcodes_different_values' => array('checked' => FALSE)
+      )
+    ),
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['border_radius']['container'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div class = "row col-settings device-icons-wrap">',
+    '#suffix' => '</div>',
+    '#states' => array(
+      'visible' => array(
+        '.nd_visualshortcodes_different_values' => array('checked' => TRUE)
+      )
+    )
+  );
+  $form['border_radius']['container']['style_border_radius_left'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Border Radius Left'),
+    '#default_value' => isset($attrs['style_border_radius_left']) ? $attrs['style_border_radius_left'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['border_radius']['container']['style_border_radius_left'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Border Radius Left'),
+    '#default_value' => isset($attrs['style_border_radius_left']) ? $attrs['style_border_radius_left'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['border_radius']['container']['style_border_radius_right'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Border Radius Right'),
+    '#default_value' => isset($attrs['style_border_radius_right']) ? $attrs['style_border_radius_right'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['border_radius']['container']['style_border_radius_top'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Border Radius Top'),
+    '#default_value' => isset($attrs['style_border_radius_top']) ? $attrs['style_border_radius_top'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['border_radius']['container']['style_border_radius_bottom'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Border Radius Bottom'),
+    '#default_value' => isset($attrs['style_border_radius_bottom']) ? $attrs['style_border_radius_bottom'] : '',
+    '#prefix' => '<div class = "col-xs-3 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  // Border settings
+  $form['border_radius']['style_border_width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Border Width (px)'),
+    '#default_value' => isset($attrs['style_border_width']) ? $attrs['style_border_width'] : '',
+    '#prefix' => '<div class = "row"><div class = "col-xs-4 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $styles = array('' => t(' - None - '), 'dotted' => t('Dotted'), 'dashed' => t('Dashed'), 'solid' => t('Solid'), 'double' => t('Double'), 'groove' => t('Groove'), 'ridge' => t('Ridge'), 'inset' => t('Inset'), 'outset' => t('Outset'));
+  $form['border_radius']['style_border_style'] = array(
+    '#type' => 'select',
+    '#title' => t('Border Style'),
+    '#options' => $styles,
+    '#default_value' => isset($attrs['style_border_style']) ? $attrs['style_border_style'] : '',
+    '#prefix' => '<div class = "col-xs-4 centered">',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['border_radius']['style_border_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Border Color'),
+    '#default_value' => isset($attrs['style_border_color']) ? $attrs['style_border_color'] : '',
+    '#prefix' => '<div class = "col-xs-4 centered">',
+    '#suffix' => '</div></div>',
+    '#attributes' => array('class' => array('form-control colorpicker-enable'))
+  );
+  // Background tab
+  $form['background']['style_background_color'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Background Color'),
+    '#default_value' => isset($attrs['style_background_color']) ? $attrs['style_background_color'] : FALSE,
+    '#attributes' => array('class' => array('form-control colorpicker-enable'))
+  );
+  $filename = isset($attrs['style_background_image']) && !empty($attrs['style_background_image']) ? file_load($attrs['style_background_image'])->uri : '';
+  $image = $filename ? theme('image_style', array('style_name' => 'media_thumbnail', 'path' => $filename)) : '';
+  $form['background']['style_background_image'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image'),
+    '#default_value' => isset($attrs['style_background_image']) ? $attrs['style_background_image'] : '',
+    '#attributes' => array('class' => array('image-media-upload hidden')),
+    '#field_suffix' => '<div class = "preview-image">' . $image . '</div><a href = "#" class = "media-upload button">' . t('Upload Image') .'</a><a href = "#" class = "media-remove button">' . t('Remove Image') .'</a>'
+  );
+  return $form;
+}
+
+function _nd_visualshortcodes_list_animations() {
+  $animations = array('bounce', 'flash', 'pulse', 'rubberBand', 'shake', 'swing', 'tada', 'wobble', 'bounceIn', 'bounceInDown', 'bounceInLeft', 'bounceInRight', 'bounceInUp', 'bounceOut', 'bounceOutDown', 'bounceOutLeft', 'bounceOutRight', 'bounceOutUp', 'fadeIn', 'fadeInDown', 'fadeInDownBig', 'fadeInLeft', 'fadeInLeftBig', 'fadeInRight', 'fadeInRightBig', 'fadeInUp', 'fadeInUpBig', 'fadeOut', 'fadeOutDown', 'fadeOutDownBig', 'fadeOutLeft', 'fadeOutLeftBig', 'fadeOutRight', 'fadeOutRightBig', 'fadeOutUp', 'fadeOutUpBig', 'flip', 'flipInX', 'flipInY', 'flipOutX', 'flipOutY', 'lightSpeedIn', 'lightSpeedOut', 'rotateIn', 'rotateInDownLeft', 'rotateInDownRight', 'rotateInUpLeft', 'rotateInUpRight', 'rotateOut', 'rotateOutDownLeft', 'rotateOutDownRight', 'rotateOutUpLeft', 'rotateOutUpRight', 'hinge', 'rollIn', 'rollOut', 'zoomIn', 'zoomInDown', 'zoomInLeft', 'zoomInRight', 'zoomInUp', 'zoomOut', 'zoomOutDown', 'zoomOutLeft', 'zoomOutRight', 'zoomOutUp'
+  );
+  return array('' => t(' - None - ')) + array_combine($animations, $animations);
+}
+
+function nd_visualshortcodes_ajax_shortcodes_list() {
+  $shortcodes = nd_visualshortcodes_list_all_enabled($_POST['format']);
+  $child = !empty($_POST['shortcode']) && isset($shortcodes[$_POST['shortcode']]['child shortcode']) ? $shortcodes[$_POST['shortcode']]['child shortcode']  : '';
+  $value = $child ? ' value="' . $shortcodes[$child]['title'] . '" data-exactly = "1"' : '';
+  $output = '<div class = "nd_visualshortcodes_enabled_list">';
+  $output .= '<div class = "nd_visualshortcodes_enabled_list_search"><input type = "text" class = "form-control" ' . $value . 'placeholder = "Search shortcode"/></div>';
+  $output .= '<div class = "nd_visualshortcodes_enabled_links">';
+  foreach($shortcodes as $name => $shortcode) {
+    $icon = $shortcode['icon'] ? '<i class = "' . $shortcode['icon'] . '"></i>' : '';
+    $output .= '<a href = "#" data-title = "' . strtolower($shortcode['title']) . '" data-shortcode = "' . $name . '" class = "btn btn-md btn-info"><span>' . $icon . $shortcode['title'] . '</span></a>';
+  }
+  $output .= '</div></div>';
+  print $output;
+  drupal_exit();
+}
+
+/**
+ * Returns only enabled Shortcodes for a specified input format.
+ */
+function nd_visualshortcodes_list_all_enabled($format, $reset = FALSE) {
+  if (is_string($format)) {
+    $format = filter_format_load($format);
+  }
+
+  $shortcodes_enabled = &drupal_static(__FUNCTION__, array());
+
+  if (isset($shortcodes_enabled[$format->format]) && !$reset) {
+    return $shortcodes_enabled[$format->format];
+  }
+  $shortcodes_enabled[$format->format] = array();
+
+  $shortcodes = shortcode_list_all($reset);
+  $filters = filter_list_format($format->format);
+
+
+  if ( !empty($filters['shortcode'])) {
+    // Run through all Shortcodes defined.
+    foreach ($filters['shortcode']->settings as $name => $enabled) {
+      if ($enabled) {
+        $shortcodes_enabled[$format->format][$name] = $shortcodes[$name];
+      }
+    }
+  }
+  if ( !empty($filters['shortcode_dynamic'])) {
+    // Run through all Shortcodes defined.
+    foreach ($filters['shortcode_dynamic']->settings as $name => $enabled) {
+      if ($enabled) {
+        $shortcodes_enabled[$format->format][$name] = $shortcodes[$name];
+      }
+    }
+  }
+  ksort($shortcodes_enabled[$format->format]);
+  return $shortcodes_enabled[$format->format];
+}
+
+function nd_visualshortcodes_ajax_shortcodes_list_add() {
+  $shortcodes = shortcode_list_all();
+  $shortcode = $shortcodes[$_POST['shortcode']];
+  $function = isset($shortcode['process backend callback']) ? $shortcode['process backend callback'] : '_nd_visualshortcodes_backend_element';
+  $element = call_user_func($function, array(), '', $_POST['shortcode']);
+  print $element;
+  drupal_exit();
+}
+
+function nd_visualshortcodes_process_shortcodes($text, $format) {
+  $text = trim($text);
+  // Wrap any code in begining of the text, search to first shortcode
+  $text = preg_replace('/^(?<!\[)([^\[]+)/si', "\n" .  '[html]${1}[/html]${2}', $text);
+  // Wrap any code on the end of the text
+  $text = preg_replace('/(\])(?<!\[html)([^\]\[]+$)/si', '${1}[html]${2}[/html]', $text);
+  // Wrap any code from the begining to the end of the text
+  $text = preg_replace('/^(?<!\[)(?<!\[html\])([^\]\[]+$)/si', "\n" .'[html]{1}${2}${3}[/html]'. "\n", $text);
+  // Wrap inside shortcode with next to another shortcode
+  $text = preg_replace('/(\[[a-z]+[^\]]*\])(?<!\[html\])([\s]*)([^\s\[]+[^\[]+)/si', '${1}[html]${2}${3}[/html]', $text);
+  // Wrap between two shortcodes
+  $text = preg_replace('/(\[\/[a-z]+\])([\s]*)([^\s\[]+[^\[]+)/si', '${1}[html]${2}${3}[/html]', $text);
+  // Clean double [html] tags
+  $text = preg_replace('/(\[html[^\]]*\])[\s]*\[html[^\]]*\]/s', '${1}', $text);
+  $text = preg_replace('/(\[\/html\])[\s]*\[\/html\]/s', '[/html]', $text);
+  // Remove the empty [html] tags
+  $text = preg_replace('/(\[html[^\]]*\])[\s]*\[\/html]*\]/s', '', $text);
+  // Get filters assigned to selected format
+  $filters = filter_list_format($format);
+  $filter_info = filter_get_filters();
+  foreach ($filters as $name => $filter) {
+    if ($filter->status && isset($filter_info[$name]['process callback'])) {
+      $text = _nd_visualshortcodes_backend_process($text, $filter);
+    }
+  }
+  return $text;
+}
+
+/**
+ * Processes the Shortcodes according to the text and the text format.
+ */
+function _nd_visualshortcodes_backend_process($text, $filter) {
+  $shortcodes = shortcode_list_all();
+  $shortcodes_enabled = array();
+
+  foreach ($filter->settings as $name => $value) {
+    if ($value && !empty($shortcodes[$name]['process callback'])) {
+      $shortcodes_enabled[$name] = array(
+        'function' => isset($shortcodes[$name]['process backend callback']) ? $shortcodes[$name]['process backend callback'] : '_nd_visualshortcodes_backend_element',
+      );
+    }
+  }
+
+  if (empty($shortcodes_enabled)) {
+    return $text;
+  }
+
+  // Save the Shortcodes in the local cache.
+  _shortcode_tags($shortcodes_enabled);
+
+  // Processing recursively, now embeding tags within other tags is supported!
+  $chunks = preg_split('!(\[{1,2}.*?\]{1,2})!', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+  $heap = array();
+  $heap_index = array();
+
+  foreach ($chunks as $c) {
+    if (!$c) {
+      continue;
+    }
+
+    $escaped = FALSE;
+
+    if ((substr($c, 0, 2) == '[[') && (substr($c, -2, 2) == ']]')) {
+      $escaped = TRUE;
+      // Checks media tags, eg: [[{ }]].
+      if ((substr($c, 0, 3) != '{') && (substr($c, -3, 1) != '}')) {
+        // Removes the outer [].
+        $c = substr($c, 1, -1);
+      }
+    }
+    // Decide this is a Shortcode tag or not.
+    if (!$escaped && ($c[0] == '[') && (substr($c, -1, 1) == ']')) {
+      // The $c maybe contains Shortcode macro.
+
+      // This is maybe a self-closing tag.
+      // Removes outer [].
+      $original_text = $c;
+      $c = substr($c, 1, -1);
+      $c = trim($c);
+
+      $ts = explode(' ', $c);
+      $tag = array_shift($ts);
+      $tag = trim($tag, '/');
+
+      if (!shortcode_is_tag($tag)) {
+        // The current tag is not enabled.
+        array_unshift($heap_index, '_string_');
+        array_unshift($heap, $original_text);
+      }
+      elseif (substr($c, -1, 1) == '/') {
+        // Processes a self closing tag, - it has "/" at the end-
+        /*
+         * The exploded array elements meaning:
+         * 0 - the full tag text?
+         * 1/5 - An extra [] to allow for escaping Shortcodes with double [[]].
+         * 2 - The Shortcode name.
+         * 3 - The Shortcode argument list.
+         * 4 - The content of a Shortcode when it wraps some content.
+         */
+
+        $m = array(
+          $c,
+          '',
+          $tag,
+          implode(' ', $ts),
+          NULL,
+          '',
+        );
+        array_unshift($heap_index, '_string_');
+        array_unshift($heap, _shortcode_process_tag($m));
+      }
+      elseif ($c[0] == '/') {
+        // Indicate a closing tag, so we process the heap.
+        $closing_tag = substr($c, 1);
+
+        $process_heap = array();
+        $process_heap_index = array();
+        $found = FALSE;
+
+        // Get elements from heap and process.
+        do {
+          $tag = array_shift($heap_index);
+          $heap_text = array_shift($heap);
+
+          if ($closing_tag == $tag) {
+            // Process the whole tag.
+            $m = array(
+              $tag . ' ' . $heap_text,
+              '',
+              $tag,
+              $heap_text,
+              implode('', $process_heap),
+              '',
+            );
+            $str = _shortcode_process_tag($m);
+            array_unshift($heap_index, '_string_');
+            array_unshift($heap, $str);
+            $found = TRUE;
+          }
+          else {
+            array_unshift($process_heap, $heap_text);
+            array_unshift($process_heap_index, $tag);
+          }
+        } while (!$found && $heap);
+
+        if (!$found) {
+          foreach ($process_heap as $val) {
+            array_unshift($heap, $val);
+          }
+          foreach ($process_heap_index as $val) {
+            array_unshift($heap_index, $val);
+          }
+        }
+
+      }
+      else {
+        // This is a starting tag. Put it to the heap.
+        array_unshift($heap_index, $tag);
+        array_unshift($heap, implode(' ', $ts));
+      }
+      // If escaped or not a Shortcode.
+    }
+    else {
+      // Maybe not found a pair?
+      array_unshift($heap_index, '_string_');
+      array_unshift($heap, $c);
+    }
+    // End of foreach.
+  }
+
+  return (implode('', array_reverse($heap)));
+}
+
+function _nd_visualshortcodes_backend_description($attrs, $text) {
+  $description = '';
+  $shortcodes = shortcode_list_all();
+  $function_description = $shortcodes[$attrs['shortcode']]['process callback'] . '_description';
+  if(isset($shortcodes[$attrs['shortcode']]['description_field'])) {
+    $field = $shortcodes[$attrs['shortcode']]['description_field'];
+    if(isset($attrs[$field]) && $attrs[$field]) {
+      $description = ' <small>(' . truncate_utf8($attrs[$field], 40, TRUE, TRUE) . ')</small>';
+    }
+  }
+  elseif(function_exists($function_description)) {
+    $text = call_user_func($function_description, $attrs, $text);
+    $description = $text ? ' <small>(' . $text . ')</small>' : '';
+  }
+  return $description;
+}
+
+function nd_visualshortcodes_preview($el, $attrs, $text) {
+  $preview = '';
+  $shortcodes = shortcode_list_all();
+  $function_preview = $shortcodes[$el]['process callback'] . '_preview';
+  $preview = '';
+  if(function_exists($function_preview)) {
+    $preview = $function_preview($attrs, $text);
+  }
+  elseif((!isset($shortcodes[$el]['preview']) || $shortcodes[$el]['preview'] !== FALSE) && !in_array($el, array('node', 'view', 'block', 'menu', 'nd_node', 'nd_view', 'nd_block', 'nd_menu'))) {
+    $preview = $shortcodes[$el]['process callback']($attrs, $text);
+  }
+  $preview = str_replace(array('<ul', '</ul>', '<li', '</li>', '<ol', '</ol>'), array('<div class = "ul"', '</div>', '<div class = "li"', '</div>', '<div class = "ol"', '</div>'), $preview);
+  return $preview;
+}
+
+function _nd_visualshortcodes_backend_element($attrs, $text, $el = '') {
+  $text = trim($text);
+  $shortcodes = shortcode_list_all();
+  if(isset($attrs['class'])) {
+    $attrs['extra_classes'] = $attrs['class'] . (isset($attrs['extra_classes']) ? ' ' . $attrs['extra_classes'] : '');
+  }
+  $attrs['class'] = 'row shortcode-processed nd-visualshortcodes-sortable nd-visualshortcodes-parent-wrap';
+  $attrs['shortcode'] = $el;
+  $title = is_array($shortcodes[$el]['title']) ? '' : $shortcodes[$el]['title'];
+  $text = is_array($text) ? '' : $text;
+  return '<li ' . drupal_attributes($attrs) . '><div class = "border-style clearfix"><h3><i class="fa fa-arrows"></i><span>' . $title . _nd_visualshortcodes_backend_description($attrs, $text) . '</span><span class = "nd-visualshortcodes-settings-links"><i class="fa fa-copy nd-visualshortcodes-copy"></i><i class="fa fa-plus-square nd_visualshortcodes_add"></i><i class="fa fa-edit shortcode-settings"></i></span></h3><ol class = "nd-visualshortcodes-parent">' . $text . '</ol></div></li>';
+}
+
+function nd_visualshortcodes_backend_nochilds($attrs, $text, $el = '') {
+  $text = trim($text);
+  // In old code can be stored text inside nochild element, show for this case default element
+  if(!empty($text) && $el != 'html') {
+    return _nd_visualshortcodes_backend_element($attrs, $text, $el);
+  }
+  $shortcodes = shortcode_list_all();
+  if(isset($attrs['class'])) {
+    $attrs['extra_classes'] = $attrs['class'] . (isset($attrs['extra_classes']) ? ' ' . $attrs['extra_classes'] : '');
+  }
+  $preview = nd_visualshortcodes_preview($el, $attrs, $text);
+  $preview = $preview ? '<div class = "nd_backend_preview">' . $preview . '</div>' : '';
+
+  $attrs['class'] = 'row shortcode-processed nd-visualshortcodes-sortable';
+  $attrs['shortcode'] = $el;
+  return '<li ' . drupal_attributes($attrs) . '><div class = "border-style border-none clearfix"><h3><i class="fa fa-arrows"></i><span>' . $shortcodes[$el]['title'] . _nd_visualshortcodes_backend_description($attrs, $text) . '</span><span class = "nd-visualshortcodes-settings-links"><i class="fa fa-copy nd-visualshortcodes-copy"></i><i class="fa fa-edit shortcode-settings"></i></span></h3><div class = "hidden">' . $text . '</div>' . $preview . '</div></li>';
+}
+
+function nd_visualshortcodes_backend_row($attrs, $text, $el = '') {
+  $shortcodes = shortcode_list_all();
+  if(isset($attrs['class'])) {
+    $attrs['extra_classes'] = $attrs['class'] . (isset($attrs['extra_classes']) ? ' ' . $attrs['extra_classes'] : '');
+  }
+  $attrs['class'] = 'row shortcode-processed nd-visualshortcodes-sortable nd-visualshortcodes-parent-wrap';
+  $attrs['shortcode'] = $el;
+  return '<li ' . drupal_attributes($attrs) . '><div class = "border-style clearfix"><h3><i class="fa fa-arrows"></i><span>' . $shortcodes[$el]['title'] . _nd_visualshortcodes_backend_description($attrs, $text) . '</span><span class = "nd-visualshortcodes-settings-links"><i class="fa fa-copy nd-visualshortcodes-copy"></i><i class="fa fa-plus-square nd_visualshortcodes_add"></i><i class="fa fa-edit shortcode-settings"></i></span></h3><ol class = "row nd-visualshortcodes-parent">' . $text . '</ol></div></li>';
+}
+
+function nd_visualshortcodes_backend_col($attrs, $text, $el = '') {
+  $shortcodes = shortcode_list_all();
+  if(isset($attrs['class'])) {
+    $attrs['extra_classes'] = $attrs['class'] . (isset($attrs['extra_classes']) ? ' ' . $attrs['extra_classes'] : '');
+  }
+  $attrs['class'] = 'shortcode-processed nd-visualshortcodes-sortable nd-visualshortcodes-parent-wrap';
+  if(isset($attrs['phone'])) {
+    $attrs['class'] .= ' col-xs-' . $attrs['phone'];
+  }
+  if(isset($attrs['tablet'])) {
+    $attrs['class'] .= ' col-sm-' . $attrs['tablet'];
+  }
+  if(isset($attrs['desktop'])) {
+    $attrs['class'] .= ' col-md-' . $attrs['desktop'];
+  }
+  if(isset($attrs['wide'])) {
+    $attrs['class'] .= ' col-lg-' . $attrs['wide'];
+  }
+  $attrs['shortcode'] = $el;
+  return '<li ' . drupal_attributes($attrs) . '><div class = "border-style clearfix"><h3><i class="fa fa-arrows"></i><span>' . $shortcodes[$el]['title'] . _nd_visualshortcodes_backend_description($attrs, $text) . '</span><span class = "nd-visualshortcodes-settings-links"><i class="fa fa-copy nd-visualshortcodes-copy"></i><i class="fa fa-plus-square nd_visualshortcodes_add"></i><i class="fa fa-edit shortcode-settings"></i></span></h3><ol class = "nd-visualshortcodes-parent">' . $text . '</ol></div></li>';
+}
+
+function nd_visualshortcodes_shortcode_html_settings($attrs, $text) {
+  // Name should be unical because WYSIWYG editor will conflict during multi-fields upload
+  $form['text_' . mktime()] = array(
+    '#type' => 'text_format',
+    '#title' => t('HTML'),
+    '#default_value' => $text,
+    '#nd_visualshortcodes' => FALSE,
+    '#attributes' => array('class' => array('input-settings')),
+    '#format' => isset($attrs['format']) ? $attrs['format'] : variable_get('nd_visualshortcodes_html_default_format', NULL),
+  );
+  return $form;
+}
+
+function nd_visualshortcodes_shortcode_col_settings($attrs, $text) {
+  $form['container'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div class = "row col-settings device-icons-wrap">',
+    '#suffix' => '</div>'
+  );
+  $options = array('' => t('Auto'), 1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 11 => 11, 12 => 12);
+  $form['container']['phone'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => isset($attrs['phone']) ? $attrs['phone'] : 0,
+    '#prefix' => '<div class = "col-xs-3 centered"><label class="sr-only" for="col-xs"><i class="fa fa-mobile fa-5x"></i></label>',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['container']['tablet'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => isset($attrs['tablet']) ? $attrs['tablet'] : 0,
+    '#prefix' => '<div class = "col-xs-3 centered"><label class="sr-only" for="col-xs"><i class="fa fa-tablet fa-5x"></i></label>',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['container']['desktop'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => isset($attrs['desktop']) ? $attrs['desktop'] : 0,
+    '#prefix' => '<div class = "col-xs-3 centered"><label class="sr-only" for="col-xs"><i class="fa fa-laptop fa-5x"></i></label>',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['container']['wide'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => isset($attrs['wide']) ? $attrs['wide'] : 0,
+    '#prefix' => '<div class = "col-xs-3 centered"><label class="sr-only" for="col-xs"><i class="fa fa-desktop fa-5x"></i></label>',
+    '#suffix' => '</div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  return $form;
+}
+
+function nd_visualshortcodes_ajax_icons_autocomplete($type, $str) {
+  $icons = array();
+  if($type == 'font_awesome' || $type == 'all') {
+    $font_awesome = nd_visualshortcodes_fontawesome_icons();
+    $icons = array_merge($icons, $font_awesome);
+  }
+  if($type == 'brands' || $type == 'all') {
+    $brands = array('icon-duckduckgo', 'icon-aim', 'icon-delicious', 'icon-paypal', 'icon-flattr', 'icon-android', 'icon-eventful', 'icon-smashmag', 'icon-gplus', 'icon-wikipedia', 'icon-lanyrd', 'icon-calendar', 'icon-stumbleupon', 'icon-fivehundredpx', 'icon-pinterest', 'icon-bitcoin', 'icon-w3c', 'icon-foursquare', 'icon-html5', 'icon-ie', 'icon-call', 'icon-grooveshark', 'icon-ninetyninedesigns', 'icon-forrst', 'icon-digg', 'icon-spotify', 'icon-reddit', 'icon-guest', 'icon-gowalla', 'icon-appstore', 'icon-blogger', 'icon-cc', 'icon-dribbble', 'icon-evernote', 'icon-flickr', 'icon-google', 'icon-viadeo', 'icon-instapaper', 'icon-weibo', 'icon-klout', 'icon-linkedin', 'icon-meetup', 'icon-vk', 'icon-plancast', 'icon-disqus', 'icon-rss', 'icon-skype', 'icon-twitter', 'icon-youtube', 'icon-vimeo', 'icon-windows', 'icon-xing', 'icon-yahoo', 'icon-chrome', 'icon-email', 'icon-macstore', 'icon-myspace', 'icon-podcast', 'icon-amazon', 'icon-steam', 'icon-cloudapp', 'icon-dropbox', 'icon-ebay', 'icon-facebook', 'icon-github', 'icon-googleplay', 'icon-itunes', 'icon-plurk', 'icon-songkick', 'icon-lastfm', 'icon-gmail', 'icon-pinboard', 'icon-openid', 'icon-quora', 'icon-soundcloud', 'icon-tumblr', 'icon-eventasaurus', 'icon-wordpress', 'icon-yelp', 'icon-intensedebate', 'icon-eventbrite', 'icon-scribd', 'icon-posterous', 'icon-stripe', 'icon-opentable', 'icon-cart', 'icon-print', 'icon-angellist', 'icon-instagram', 'icon-dwolla', 'icon-appnet', 'icon-statusnet', 'icon-acrobat', 'icon-drupal', 'icon-buffer', 'icon-pocket', 'icon-bitbucket');
+    $icons = array_merge($icons, $brands);
+  }
+  $matches = array();
+  foreach ($icons as $icon) {
+    if(stripos($icon, $str) !== FALSE) {
+      $matches[$icon] = '<i class = "' . $icon . '"><i> ' . $icon;
+    }
+  }
+  drupal_json_output($matches);
+}
+
+function nd_visualshortcodes_fontawesome_icons() {
+  $font_awesome = array('fa fa-glass', 'fa fa-music', 'fa fa-search', 'fa fa-envelope-o', 'fa fa-heart', 'fa fa-star', 'fa fa-star-o', 'fa fa-user', 'fa fa-film', 'fa fa-th-large', 'fa fa-th', 'fa fa-th-list', 'fa fa-check', 'fa fa-remove', 'fa fa-search-plus', 'fa fa-search-minus', 'fa fa-power-off', 'fa fa-signal', 'fa fa-gear', 'fa fa-trash-o', 'fa fa-home', 'fa fa-file-o', 'fa fa-clock-o', 'fa fa-road', 'fa fa-download', 'fa fa-arrow-circle-o-down', 'fa fa-arrow-circle-o-up', 'fa fa-inbox', 'fa fa-play-circle-o', 'fa fa-rotate-right', 'fa fa-refresh', 'fa fa-list-alt', 'fa fa-lock', 'fa fa-flag', 'fa fa-headphones', 'fa fa-volume-off', 'fa fa-volume-down', 'fa fa-volume-up', 'fa fa-qrcode', 'fa fa-barcode', 'fa fa-tag', 'fa fa-tags', 'fa fa-book', 'fa fa-bookmark', 'fa fa-print', 'fa fa-camera', 'fa fa-font', 'fa fa-bold', 'fa fa-italic', 'fa fa-text-height', 'fa fa-text-width', 'fa fa-align-left', 'fa fa-align-center', 'fa fa-align-right', 'fa fa-align-justify', 'fa fa-list', 'fa fa-dedent', 'fa fa-indent', 'fa fa-video-camera', 'fa fa-photo', 'fa fa-pencil', 'fa fa-map-marker', 'fa fa-adjust', 'fa fa-tint', 'fa fa-edit', 'fa fa-share-square-o', 'fa fa-check-square-o', 'fa fa-arrows', 'fa fa-step-backward', 'fa fa-fast-backward', 'fa fa-backward', 'fa fa-play', 'fa fa-pause', 'fa fa-stop', 'fa fa-forward', 'fa fa-fast-forward', 'fa fa-step-forward', 'fa fa-eject', 'fa fa-chevron-left', 'fa fa-chevron-right', 'fa fa-plus-circle', 'fa fa-minus-circle', 'fa fa-times-circle', 'fa fa-check-circle', 'fa fa-question-circle', 'fa fa-info-circle', 'fa fa-crosshairs', 'fa fa-times-circle-o', 'fa fa-check-circle-o', 'fa fa-ban', 'fa fa-arrow-left', 'fa fa-arrow-right', 'fa fa-arrow-up', 'fa fa-arrow-down', 'fa fa-mail-forward', 'fa fa-expand', 'fa fa-compress', 'fa fa-plus', 'fa fa-minus', 'fa fa-asterisk', 'fa fa-exclamation-circle', 'fa fa-gift', 'fa fa-leaf', 'fa fa-fire', 'fa fa-eye', 'fa fa-eye-slash', 'fa fa-warning', 'fa fa-plane', 'fa fa-calendar', 'fa fa-random', 'fa fa-comment', 'fa fa-magnet', 'fa fa-chevron-up', 'fa fa-chevron-down', 'fa fa-retweet', 'fa fa-shopping-cart', 'fa fa-folder', 'fa fa-folder-open', 'fa fa-arrows-v', 'fa fa-arrows-h', 'fa fa-bar-chart-o', 'fa fa-twitter-square', 'fa fa-facebook-square', 'fa fa-camera-retro', 'fa fa-key', 'fa fa-gears', 'fa fa-comments', 'fa fa-thumbs-o-up', 'fa fa-thumbs-o-down', 'fa fa-star-half', 'fa fa-heart-o', 'fa fa-sign-out', 'fa fa-linkedin-square', 'fa fa-thumb-tack', 'fa fa-external-link', 'fa fa-sign-in', 'fa fa-trophy', 'fa fa-github-square', 'fa fa-upload', 'fa fa-lemon-o', 'fa fa-phone', 'fa fa-square-o', 'fa fa-bookmark-o', 'fa fa-phone-square', 'fa fa-twitter', 'fa fa-facebook-f', 'fa fa-github', 'fa fa-unlock', 'fa fa-credit-card', 'fa fa-feed', 'fa fa-hdd-o', 'fa fa-bullhorn', 'fa fa-bell', 'fa fa-certificate', 'fa fa-hand-o-right', 'fa fa-hand-o-left', 'fa fa-hand-o-up', 'fa fa-hand-o-down', 'fa fa-arrow-circle-left', 'fa fa-arrow-circle-right', 'fa fa-arrow-circle-up', 'fa fa-arrow-circle-down', 'fa fa-globe', 'fa fa-wrench', 'fa fa-tasks', 'fa fa-filter', 'fa fa-briefcase', 'fa fa-arrows-alt', 'fa fa-group', 'fa fa-chain', 'fa fa-cloud', 'fa fa-flask', 'fa fa-cut', 'fa fa-copy', 'fa fa-paperclip', 'fa fa-save', 'fa fa-square', 'fa fa-navicon', 'fa fa-list-ul', 'fa fa-list-ol', 'fa fa-strikethrough', 'fa fa-underline', 'fa fa-table', 'fa fa-magic', 'fa fa-truck', 'fa fa-pinterest', 'fa fa-pinterest-square', 'fa fa-google-plus-square', 'fa fa-google-plus', 'fa fa-money', 'fa fa-caret-down', 'fa fa-caret-up', 'fa fa-caret-left', 'fa fa-caret-right', 'fa fa-columns', 'fa fa-unsorted', 'fa fa-sort-down', 'fa fa-sort-up', 'fa fa-envelope', 'fa fa-linkedin', 'fa fa-rotate-left', 'fa fa-legal', 'fa fa-dashboard', 'fa fa-comment-o', 'fa fa-comments-o', 'fa fa-flash', 'fa fa-sitemap', 'fa fa-umbrella', 'fa fa-paste', 'fa fa-lightbulb-o', 'fa fa-exchange', 'fa fa-cloud-download', 'fa fa-cloud-upload', 'fa fa-user-md', 'fa fa-stethoscope', 'fa fa-suitcase', 'fa fa-bell-o', 'fa fa-coffee', 'fa fa-cutlery', 'fa fa-file-text-o', 'fa fa-building-o', 'fa fa-hospital-o', 'fa fa-ambulance', 'fa fa-medkit', 'fa fa-fighter-jet', 'fa fa-beer', 'fa fa-h-square', 'fa fa-plus-square', 'fa fa-angle-double-left', 'fa fa-angle-double-right', 'fa fa-angle-double-up', 'fa fa-angle-double-down', 'fa fa-angle-left', 'fa fa-angle-right', 'fa fa-angle-up', 'fa fa-angle-down', 'fa fa-desktop', 'fa fa-laptop', 'fa fa-tablet', 'fa fa-mobile-phone', 'fa fa-circle-o', 'fa fa-quote-left', 'fa fa-quote-right', 'fa fa-spinner', 'fa fa-circle', 'fa fa-mail-reply', 'fa fa-github-alt', 'fa fa-folder-o', 'fa fa-folder-open-o', 'fa fa-smile-o', 'fa fa-frown-o', 'fa fa-meh-o', 'fa fa-gamepad', 'fa fa-keyboard-o', 'fa fa-flag-o', 'fa fa-flag-checkered', 'fa fa-terminal', 'fa fa-code', 'fa fa-mail-reply-all', 'fa fa-star-half-empty', 'fa fa-location-arrow', 'fa fa-crop', 'fa fa-code-fork', 'fa fa-unlink', 'fa fa-question', 'fa fa-info', 'fa fa-exclamation', 'fa fa-superscript', 'fa fa-subscript', 'fa fa-eraser', 'fa fa-puzzle-piece', 'fa fa-microphone', 'fa fa-microphone-slash', 'fa fa-shield', 'fa fa-calendar-o', 'fa fa-fire-extinguisher', 'fa fa-rocket', 'fa fa-maxcdn', 'fa fa-chevron-circle-left', 'fa fa-chevron-circle-right', 'fa fa-chevron-circle-up', 'fa fa-chevron-circle-down', 'fa fa-html5', 'fa fa-css3', 'fa fa-anchor', 'fa fa-unlock-alt', 'fa fa-bullseye', 'fa fa-ellipsis-h', 'fa fa-ellipsis-v', 'fa fa-rss-square', 'fa fa-play-circle', 'fa fa-ticket', 'fa fa-minus-square', 'fa fa-minus-square-o', 'fa fa-level-up', 'fa fa-level-down', 'fa fa-check-square', 'fa fa-pencil-square', 'fa fa-external-link-square', 'fa fa-share-square', 'fa fa-compass', 'fa fa-toggle-down', 'fa fa-toggle-up', 'fa fa-toggle-right', 'fa fa-euro', 'fa fa-gbp', 'fa fa-dollar', 'fa fa-rupee', 'fa fa-cny', 'fa fa-ruble', 'fa fa-won', 'fa fa-bitcoin', 'fa fa-file', 'fa fa-file-text', 'fa fa-sort-alpha-asc', 'fa fa-sort-alpha-desc', 'fa fa-sort-amount-asc', 'fa fa-sort-amount-desc', 'fa fa-sort-numeric-asc', 'fa fa-sort-numeric-desc', 'fa fa-thumbs-up', 'fa fa-thumbs-down', 'fa fa-youtube-square', 'fa fa-youtube', 'fa fa-xing', 'fa fa-xing-square', 'fa fa-youtube-play', 'fa fa-dropbox', 'fa fa-stack-overflow', 'fa fa-instagram', 'fa fa-flickr', 'fa fa-adn', 'fa fa-bitbucket', 'fa fa-bitbucket-square', 'fa fa-tumblr', 'fa fa-tumblr-square', 'fa fa-long-arrow-down', 'fa fa-long-arrow-up', 'fa fa-long-arrow-left', 'fa fa-long-arrow-right', 'fa fa-apple', 'fa fa-windows', 'fa fa-android', 'fa fa-linux', 'fa fa-dribbble', 'fa fa-skype', 'fa fa-foursquare', 'fa fa-trello', 'fa fa-female', 'fa fa-male', 'fa fa-gittip', 'fa fa-sun-o', 'fa fa-moon-o', 'fa fa-archive', 'fa fa-bug', 'fa fa-vk', 'fa fa-weibo', 'fa fa-renren', 'fa fa-pagelines', 'fa fa-stack-exchange', 'fa fa-arrow-circle-o-right', 'fa fa-arrow-circle-o-left', 'fa fa-toggle-left', 'fa fa-dot-circle-o', 'fa fa-wheelchair', 'fa fa-vimeo-square', 'fa fa-turkish-lira', 'fa fa-plus-square-o', 'fa fa-space-shuttle', 'fa fa-slack', 'fa fa-envelope-square', 'fa fa-wordpress', 'fa fa-openid', 'fa fa-institution', 'fa fa-mortar-board', 'fa fa-yahoo', 'fa fa-google', 'fa fa-reddit', 'fa fa-reddit-square', 'fa fa-stumbleupon-circle', 'fa fa-stumbleupon', 'fa fa-delicious', 'fa fa-digg', 'fa fa-pied-piper', 'fa fa-pied-piper-alt', 'fa fa-drupal', 'fa fa-joomla', 'fa fa-language', 'fa fa-fax', 'fa fa-building', 'fa fa-child', 'fa fa-paw', 'fa fa-spoon', 'fa fa-cube', 'fa fa-cubes', 'fa fa-behance', 'fa fa-behance-square', 'fa fa-steam', 'fa fa-steam-square', 'fa fa-recycle', 'fa fa-automobile', 'fa fa-cab', 'fa fa-tree', 'fa fa-spotify', 'fa fa-deviantart', 'fa fa-soundcloud', 'fa fa-database', 'fa fa-file-pdf-o', 'fa fa-file-word-o', 'fa fa-file-excel-o', 'fa fa-file-powerpoint-o', 'fa fa-file-photo-o', 'fa fa-file-zip-o', 'fa fa-file-sound-o', 'fa fa-file-movie-o', 'fa fa-file-code-o', 'fa fa-vine', 'fa fa-codepen', 'fa fa-jsfiddle', 'fa fa-life-bouy', 'fa fa-circle-o-notch', 'fa fa-ra', 'fa fa-ge', 'fa fa-git-square', 'fa fa-git', 'fa fa-y-combinator-square', 'fa fa-tencent-weibo', 'fa fa-qq', 'fa fa-wechat', 'fa fa-send', 'fa fa-send-o', 'fa fa-history', 'fa fa-circle-thin', 'fa fa-header', 'fa fa-paragraph', 'fa fa-sliders', 'fa fa-share-alt', 'fa fa-share-alt-square', 'fa fa-bomb', 'fa fa-soccer-ball-o', 'fa fa-tty', 'fa fa-binoculars', 'fa fa-plug', 'fa fa-slideshare', 'fa fa-twitch', 'fa fa-yelp', 'fa fa-newspaper-o', 'fa fa-wifi', 'fa fa-calculator', 'fa fa-paypal', 'fa fa-google-wallet', 'fa fa-cc-visa', 'fa fa-cc-mastercard', 'fa fa-cc-discover', 'fa fa-cc-amex', 'fa fa-cc-paypal', 'fa fa-cc-stripe', 'fa fa-bell-slash', 'fa fa-bell-slash-o', 'fa fa-trash', 'fa fa-copyright', 'fa fa-at', 'fa fa-eyedropper', 'fa fa-paint-brush', 'fa fa-birthday-cake', 'fa fa-area-chart', 'fa fa-pie-chart', 'fa fa-line-chart', 'fa fa-lastfm', 'fa fa-lastfm-square', 'fa fa-toggle-off', 'fa fa-toggle-on', 'fa fa-bicycle', 'fa fa-bus', 'fa fa-ioxhost', 'fa fa-angellist', 'fa fa-cc', 'fa fa-shekel', 'fa fa-meanpath', 'fa fa-buysellads', 'fa fa-connectdevelop', 'fa fa-dashcube', 'fa fa-forumbee', 'fa fa-leanpub', 'fa fa-sellsy', 'fa fa-shirtsinbulk', 'fa fa-simplybuilt', 'fa fa-skyatlas', 'fa fa-cart-plus', 'fa fa-cart-arrow-down', 'fa fa-diamond', 'fa fa-ship', 'fa fa-user-secret', 'fa fa-motorcycle', 'fa fa-street-view', 'fa fa-heartbeat', 'fa fa-venus', 'fa fa-mars', 'fa fa-mercury', 'fa fa-intersex', 'fa fa-transgender-alt', 'fa fa-venus-double', 'fa fa-mars-double', 'fa fa-venus-mars', 'fa fa-mars-stroke', 'fa fa-mars-stroke-v', 'fa fa-mars-stroke-h', 'fa fa-neuter', 'fa fa-genderless', 'fa fa-facebook-official', 'fa fa-pinterest-p', 'fa fa-whatsapp', 'fa fa-server', 'fa fa-user-plus', 'fa fa-user-times', 'fa fa-hotel', 'fa fa-viacoin', 'fa fa-train', 'fa fa-subway', 'fa fa-medium', 'fa fa-yc', 'fa fa-optin-monster', 'fa fa-opencart', 'fa fa-expeditedssl', 'fa fa-battery-4', 'fa fa-battery-3', 'fa fa-battery-2', 'fa fa-battery-1', 'fa fa-battery-0', 'fa fa-mouse-pointer', 'fa fa-i-cursor', 'fa fa-object-group', 'fa fa-object-ungroup', 'fa fa-sticky-note', 'fa fa-sticky-note-o', 'fa fa-cc-jcb', 'fa fa-cc-diners-club', 'fa fa-clone', 'fa fa-balance-scale', 'fa fa-hourglass-o', 'fa fa-hourglass-1', 'fa fa-hourglass-2', 'fa fa-hourglass-3', 'fa fa-hourglass', 'fa fa-hand-grab-o', 'fa fa-hand-stop-o', 'fa fa-hand-scissors-o', 'fa fa-hand-lizard-o', 'fa fa-hand-spock-o', 'fa fa-hand-pointer-o', 'fa fa-hand-peace-o', 'fa fa-trademark', 'fa fa-registered', 'fa fa-creative-commons', 'fa fa-gg', 'fa fa-gg-circle', 'fa fa-tripadvisor', 'fa fa-odnoklassniki', 'fa fa-odnoklassniki-square', 'fa fa-get-pocket', 'fa fa-wikipedia-w', 'fa fa-safari', 'fa fa-chrome', 'fa fa-firefox', 'fa fa-opera', 'fa fa-internet-explorer', 'fa fa-tv', 'fa fa-contao', 'fa fa-500px', 'fa fa-amazon', 'fa fa-calendar-plus-o', 'fa fa-calendar-minus-o', 'fa fa-calendar-times-o', 'fa fa-calendar-check-o', 'fa fa-industry', 'fa fa-map-pin', 'fa fa-map-signs', 'fa fa-map-o', 'fa fa-map', 'fa fa-commenting', 'fa fa-commenting-o', 'fa fa-houzz', 'fa fa-vimeo', 'fa fa-black-tie', 'fa fa-fonticons');
+  return $font_awesome;
+}
+
+function nd_visualshortcodes_ajax_node_autocomplete($str) {
+  $query = db_select('node', 'n');
+  $return = $query
+    ->fields('n', array('nid', 'title'))
+    ->condition('n.title', '%' . db_like($str) . '%', 'LIKE')
+    ->range(0, 15)
+    ->execute();
+  $matches = array();
+  foreach ($return as $row) {
+    $matches['node/' . $row->nid . '/edit'] = check_plain($row->title);
+  }
+  drupal_json_output($matches);
+}

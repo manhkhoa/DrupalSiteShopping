@@ -1,0 +1,585 @@
+<?php
+
+module_load_include('inc', 'nikadevs_cms', 'inc/nikadevs_cms');
+module_load_include('inc', 'nikadevs_cms', 'inc/nikadevs_cms_background');
+module_load_include('inc', 'nikadevs_cms', 'shortcodes/nikadevs_cms_shortcodes');
+
+/**
+ * Implements hook_init().
+ *
+ */
+function nikadevs_cms_init() {
+  if (user_access('use nikadevs cms') && theme_get_setting('support', variable_get('theme_default', 'none'))) {
+    $module_path = drupal_get_path('module', 'nikadevs_cms');
+    drupal_add_js($module_path . '/support/js/html2canvas.js');
+    drupal_add_js($module_path . '/support/js/feedback.js');
+    drupal_add_css($module_path . '/support/css/feedback.css');
+    drupal_add_js(array('nikadevs_cms' => array('module_path' => $module_path, 'site_mail' => variable_get('site_mail', '') == '' ? 0 : 1)), 'setting');
+  }
+  if(strpos($_GET['q'], 'admin/structure/md-slider') !== FALSE) {
+    drupal_add_css('
+    html{
+      direction: ltr;
+    }', 'inline');
+  }
+}
+
+function nikadevs_cms_layout_builder() {
+  drupal_add_library('system', 'ui.dialog');
+  drupal_add_js(drupal_get_path('module', 'nikadevs_cms') . '/js/switchery.js');
+  drupal_add_js(drupal_get_path('module', 'nikadevs_cms') . '/js/jquery-sortable.js');
+
+  $form = array();
+  $libraries = drupal_get_library('media');
+  $form['#attached']['library'][] = array('media', 'media_browser');
+  if (!isset($libraries['media_browser_settings'])) {
+    $settings = array(
+      'browserUrl' => url('media/browser', array(
+          'query' => array(
+            'render' => 'media-popup'
+          ))
+      ),
+      'styleSelectorUrl' => url('media/-media_id-/format-form', array(
+          'query' => array(
+            'render' => 'media-popup'
+          ))
+      ),
+      'dialogOptions' => array(
+        'dialogclass' => variable_get('media_dialogclass', 'media-wrapper'),
+        'modal' => (boolean)variable_get('media_modal', TRUE),
+        'draggable' => (boolean)variable_get('media_draggable', FALSE),
+        'resizable' => (boolean)variable_get('media_resizable', FALSE),
+        'minwidth' => (int)variable_get('media_minwidth', 500),
+        'width' => (int)variable_get('media_width', 670),
+        'height' => (int)variable_get('media_height', 280),
+        'position' => variable_get('media_position', 'center'),
+        'overlay' => array(
+          'backgroundcolor' => variable_get('media_backgroundcolor', '#000000'),
+          'opacity' => (float)variable_get('media_opacity', 0.4),
+        ),
+        'zindex' => (int)variable_get('media_zindex', 10000),
+      ),
+    );
+    $form['#attached']['js'][] = array(
+      'data' => array('media' => $settings),
+      'type' => 'setting',
+    );
+  }
+  else {
+    $form['#attached']['library'][] = array('media', 'media_browser_settings');
+  }
+
+  drupal_add_css('//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css', 'external');
+
+  // Get all regions for current theme
+  $current_theme = variable_get('theme_default', 'none');
+  $themes = list_themes();
+  $theme = $themes[$current_theme];  
+  $regions = $theme->info['regions'];
+
+  // Get layouts for current theme
+  $layouts = variable_get('nikadevs_cms_layout_' . $current_theme, array(
+    'layout-default' => array(
+      'name' => t('Default'),
+      'pages' => '',
+      'rows' => array(
+        'id-0' => array(
+          'name' => t('Hidden') ,
+          'attributes' => array(
+            'id' => 'id-0',
+            'class' => array('sortable', 'row', 'sortable-parent'))
+          )
+        )
+      )
+    )
+  );
+
+  // Add new regions
+  foreach($regions as $key => $region) {
+    // Go throught every layout
+    foreach($layouts as $i => $layout ) {
+      // Assign new region to Hidden container
+      if(!isset($layouts[$i]['regions'][$key])) {
+        $layouts[$i]['regions'][$key] = array(
+          'row_id' => 'id-' . 0,
+          'name' => $region,
+          'attributes' => array(
+            'id' => $key
+          )
+        );
+      }
+      $layouts[$i]['regions'][$key]['exists'] = 1;
+    }
+  }
+
+  foreach($layouts as $i => $layout ) {
+    if(!isset($layout['rows']) || empty($layout['rows'])) {
+      unset($layouts[$i]);
+      continue;
+    }
+    // Set required for builder class
+    foreach($layouts[$i]['regions'] as $key => $region) {
+      // Remove deleted from Theme info regions but not added BLOCKS
+      if (!isset($layouts[$i]['regions'][$key]['exists']) && !isset($layouts[$i]['regions'][$key]['settings']['block_id']) || (isset($layouts[$i]['regions'][$key]['settings']['block_id']) && $layouts[$i]['regions'][$key]['row_id'] == 'id-0')) {
+        unset($layouts[$i]['regions'][$key]);
+      }
+      elseif(empty($layouts[$i]['regions'][$key]['attributes']['class'])) {
+        $layouts[$i]['regions'][$key]['attributes']['class'][] = 'col-md-12';
+      }
+    }
+    // Process Background settings
+    foreach ($layout['rows'] as $r => $row) {
+      if (isset($row['settings']['bg_image_type']) && $row['settings']['bg_image_type'] == 'image' && isset($row['settings']['bg_image_fid']) && $row['settings']['bg_image_fid']) {
+        $file = file_load($row['settings']['bg_image_fid']);
+        if(isset($file->uri)) {
+          $layouts[$i]['rows'][$r]['settings']['bg_image_preview'] = theme('image_style', array('style_name' => 'square_thumbnail', 'path' => $file->uri));
+        }
+      }
+    }
+  }
+
+  module_load_include('inc', 'block', 'block.admin');
+  $blocks = block_admin_display_prepare_blocks($current_theme);
+  usort($blocks, '_sort_blocks');
+
+  drupal_add_js(array('nikadevs_cms' => array('layouts' => $layouts)), 'setting');
+
+  $form['options']['nd_layout_builder'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Layout Builder'),
+  );
+  $form['options']['nd_layout_builder']['builder'] = array(
+    '#attached' => array(
+      'js' => array(drupal_get_path('module', 'nikadevs_cms') . '/layout_builder/nikadevs-cms-layout-builder.js'),
+      'css' => array(
+          drupal_get_path('module', 'nikadevs_cms') . '/layout_builder/nikadevs-cms-layout-builder.css',
+          drupal_get_path('module', 'nikadevs_cms') . '/layout_builder/nikadevs-cms-layout-builder-min-bootstrap.css'
+        )
+      ),
+    '#markup' => theme('nikadevs_cms_layout_builder', array('layouts' => $layouts, 'blocks' => $blocks))
+  );
+  return $form;
+}
+
+function _sort_blocks($a, $b) {
+  return $a['info'] > $b['info'];
+}
+
+function nikadevs_cms_page_layout($vars = array()) {
+  $layout = _nikadevs_cms_active_layout($vars);
+  return theme('nikadevs_cms_layout_page', array('vars' => $vars, 'layout' => $layout));
+}
+
+function nikadevs_cms_layout_builder_update() {
+  $current_theme = variable_get('theme_default', 'none');
+  $layouts = variable_get('nikadevs_cms_layout_' . $current_theme, array());
+
+  if(isset($_POST['op']) && $_POST['op'] == 'delete') {
+    unset($layouts[$_POST['id']]);
+  }
+  else {
+    $layouts[$_POST['id']] = $_POST['layout'];
+  }
+
+  variable_set('nikadevs_cms_layout_' . $current_theme, $layouts);
+  drupal_exit();
+ }
+
+/**
+ * Implements hook_form_alter().
+ *
+ */
+function nikadevs_cms_form_alter(&$form, &$form_state, &$form_id) {
+  if($form_id == 'block_admin_display_form' || strpos($form_id, 'block_') === 0) {
+    drupal_add_library('system', 'ui.dialog');
+    // Get current settings
+    $current_theme = variable_get('theme_default', 'none');
+    $settings = variable_get('nikadevs_cms_block_settings_' . $current_theme, array());
+    drupal_add_js(array('nikadevs_cms' => array('block_settings' => $settings)), 'setting');
+    // Add icons
+    drupal_add_css('//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css', 'external');
+    if(strpos($form_id, 'block_') === 0 && strpos($form_id, '_configure') !== FALSE) {
+      $id = $form['module']['#value'] . '_' . $form['delta']['#value'];
+      $form['#prefix'] = '<div class = "block-single-setting" data-theme = "' . $current_theme . '" data-id = "' . $id . '"><b>' . t('Block Settings') . '</b> <i class="fa fa-cog fa-lg block-settings"></i></div>';
+    }
+    $form['nikadevs_cms_block_settings'] = array(
+      '#attached' => array(
+        'js' => array(drupal_get_path('module', 'nikadevs_cms') . '/block_settings/nikadevs-cms-block-settings.js'),
+        'css' => array(
+            drupal_get_path('module', 'nikadevs_cms') . '/layout_builder/nikadevs-cms-layout-builder-min-bootstrap.css',
+            drupal_get_path('module', 'nikadevs_cms') . '/block_settings/nikadevs-cms-block-settings.css',
+          )
+        ),
+      '#markup' => theme('nikadevs_cms_block_settings')
+    );
+  }
+}
+
+function nikadevs_cms_block_settings_update() {
+  $block_settings = $_GET['block_settings'];
+  $settings = variable_get('nikadevs_cms_block_settings_' . $block_settings['theme'], array());
+  $settings[$block_settings['block_id']] = $block_settings;
+  variable_set('nikadevs_cms_block_settings_' . $block_settings['theme'], $settings);
+  drupal_json_output($settings);
+  drupal_exit();
+}
+
+function nikadevs_cms_preprocess_block(&$variables) {
+  $current_theme = variable_get('theme_default', 'none');
+  $settings = variable_get('nikadevs_cms_block_settings_' . $current_theme, array());
+
+  $variables['tag'] = 'div';
+  $id = $variables['block']->module . '_' . $variables['block']->delta;
+  if(isset($settings[$id])) {
+    if(isset($settings[$id]['animation']) && !empty($settings[$id]['animation'])) {
+      $variables['attributes_array']['data-animation'] = $settings[$id]['animation'];
+      if(isset($settings[$id]['delay']) && !empty($settings[$id]['delay'])) {
+        $variables['attributes_array']['data-animation-delay'] = $settings[$id]['delay'];
+      }
+    }
+    $variables['classes_array'][] = isset($settings[$id]['class']) ? $settings[$id]['class'] : '';
+    $variables['tag'] = isset($settings[$id]['tag']) && $settings[$id]['tag'] ? $settings[$id]['tag'] : 'div';
+  }
+}
+
+/**
+ * Implements hook_menu().
+ *
+ * Admin menu item and ajax callbacks to save the data being edited
+ */
+function nikadevs_cms_menu() {
+  $items = array();
+
+  $items['admin/config/cms'] = array(
+    'title' => t('Manage CMS'),
+    'page callback' => 'nikadevs_cms_admin',
+    'access arguments' => array('use nikadevs cms'),
+  );
+  $items['admin/drop_layout_builder'] = array(
+    'page callback' => 'nikadevs_cms_drop_layout_builder',
+    'access arguments' => array('use nikadevs cms'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['nikadevs_cms/layout_builder/update'] = array(
+    'page callback' => 'nikadevs_cms_layout_builder_update',
+    'access arguments' => array('use nikadevs cms'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['nikadevs_cms/block_settings/update'] = array(
+    'page callback' => 'nikadevs_cms_block_settings_update',
+    'access arguments' => array('use nikadevs cms'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['nikadevs_cms/file_delete/%file'] = array(
+    'page callback' => 'nikadevs_cms_filedelete',
+    'page arguments' => array(2),
+    'access arguments' => array('use nikadevs cms'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/cms/background'] = array(
+    'title' => t('Page Backgrounds'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('nikadevs_cms_background'),
+    'access arguments' => array('use nikadevs cms'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+function nikadevs_cms_filedelete($file) {
+  if(isset($file->fid)) {
+    file_delete($file);
+    drupal_exit();
+  }
+}
+
+function nikadevs_cms_admin() {
+  return t('Welcome to NikaDevs Admin pages.');
+}
+
+/**
+ * Implements hook_permission().
+ */
+function nikadevs_cms_permission() {
+  return array(
+    'use nikadevs cms' => array(
+      'title' => t('Use NikaDevs functions'),
+      'description' => t('Use the Layout Builder features and other.'),
+    ),
+  );
+}
+
+/**
+ * Return array with region ID and his HTML class name
+*/
+function nikadevs_cms_theme() {
+ return array(
+  'nikadevs_cms_layout_builder' => array(
+    'variables' => array(
+      'layouts' => NULL,
+      'blocks' => NULL
+    ),
+    'template' => 'nikadevs-cms-layout-builder',
+    'path' => drupal_get_path('module', 'nikadevs_cms') . '/layout_builder'
+  ),
+  'nikadevs_cms_block_settings' => array(
+    'template' => 'nikadevs-cms-block-settings',
+    'path' => drupal_get_path('module', 'nikadevs_cms') . '/block_settings'
+  ),
+  'nikadevs_cms_layout_page' => array(
+    'variables' => array(
+      'vars' => NULL,
+      'layout' => ''
+    ),
+    'template' => 'nikadevs-cms-layout-page',
+    'path' => drupal_get_path('module', 'nikadevs_cms') . '/layout_builder'
+  ),
+  'nikadevs_cms_background_table' => array(
+    'render element' => 'form'
+  ),
+  );
+}
+
+/**
+ * Implements hook_custom_theme().
+ */
+function nikadevs_cms_custom_theme() {
+  // Allow the user to login with default theme
+  if (isset($_GET['custom_theme']) && $_GET['custom_theme'] == 'seven') {
+    return 'seven';
+  }
+}
+
+/**
+ * Implementation of hook_filter_info().
+ */
+function nikadevs_cms_filter_info() {
+  $filters['shortcode_dynamic'] = array(
+    'title' => t('Shortcodes Dynamic'),
+    'description' => t('Alias of Shortcodes with disabled CACHE. Use for dynamic content such as VIEW.'),
+    'process callback' => '_nikadevs_cms_shortcode_process',
+    'settings callback' => '_shortcode_settings_form',
+    'cache' => FALSE,
+  );
+  return $filters;
+}
+
+/**
+ * Implementation of hook_filter_info().
+ */
+function nikadevs_cms_filter_info_alter(&$info) {
+  if(isset($info['shortcode'])) {
+    $info['shortcode']['process callback'] = '_nikadevs_cms_static_shortcode_process';
+  }
+}
+
+/**
+ * Processes the Static Shortcodes according to the text and the text format.
+ */
+function _nikadevs_cms_static_shortcode_process($text, $filter) {
+  $text = str_replace(array('|LS|', '|RS|', '|LF|', '|RF|', '|{', '|}'), array('[', ']', '{', '}', '<', '>'), $text);
+  return _shortcode_process($text, $filter);
+}
+
+/**
+ * Processes the Dynamic Shortcodes according to the text and the text format.
+ */
+function _nikadevs_cms_shortcode_process($text, $filter) {
+  $text = str_replace(array('|LS|', '|RS|', '|LF|', '|RF|', '|{', '|}'), array('[', ']', '{', '}', '<', '>'), $text);
+  $shortcodes = shortcode_list_all();
+  $shortcodes_enabled = array();
+  foreach ($filter->settings as $name => $value) {
+    if ($value && !empty($shortcodes[$name]['process callback'])) {
+      $shortcodes_enabled[$name] = array(
+        'function' => $shortcodes[$name]['process callback'],
+      );
+    }
+  }
+
+  if (empty($shortcodes_enabled)) {
+    return $text;
+  }
+
+  // Save the Shortcodes in the local cache.
+  _shortcode_tags($shortcodes_enabled);
+
+  // Processing recursively, now embeding tags within other tags is supported!
+  $chunks = preg_split('!(\[{1,2}.*?\]{1,2})!', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+
+  $heap = array();
+  $heap_index = array();
+
+  foreach ($chunks as $c) {
+    if (!$c) {
+      continue;
+    }
+
+    $escaped = FALSE;
+
+    if ((substr($c, 0, 2) == '[[') && (substr($c, -2, 2) == ']]')) {
+      $escaped = TRUE;
+      // Checks media tags, eg: [[{ }]].
+      if ((substr($c, 0, 3) != '{') && (substr($c, -3, 1) != '}')) {
+        // Removes the outer [].
+        $c = substr($c, 1, -1);
+      }
+    }
+    // Decide this is a Shortcode tag or not.
+    if (!$escaped && ($c[0] == '[') && (substr($c, -1, 1) == ']')) {
+      // The $c maybe contains Shortcode macro.
+
+      // This is maybe a self-closing tag.
+      // Removes outer [].
+      $original_text = $c;
+      $c = substr($c, 1, -1);
+      $c = trim($c);
+
+      $ts = explode(' ', $c);
+      $tag = array_shift($ts);
+      $tag = trim($tag, '/');
+
+      if (!isset($shortcodes_enabled[$tag])) {
+        // The current tag is not enabled.
+        array_unshift($heap_index, '_string_');
+        array_unshift($heap, $original_text);
+      }
+      elseif (substr($c, -1, 1) == '/') {
+        // Processes a self closing tag, - it has "/" at the end-
+        /*
+         * The exploded array elements meaning:
+         * 0 - the full tag text?
+         * 1/5 - An extra [] to allow for escaping Shortcodes with double [[]].
+         * 2 - The Shortcode name.
+         * 3 - The Shortcode argument list.
+         * 4 - The content of a Shortcode when it wraps some content.
+         */
+
+        $m = array(
+          $c,
+          '',
+          $tag,
+          implode(' ', $ts),
+          NULL,
+          '',
+        );
+        array_unshift($heap_index, '_string_');
+        array_unshift($heap, _shortcode_process_tag($m));
+        // In shortcode can be used another Format with differents shortcodes, so restore the cache
+        _shortcode_tags($shortcodes_enabled);
+      }
+      elseif ($c[0] == '/') {
+        // Indicate a closing tag, so we process the heap.
+        $closing_tag = substr($c, 1);
+
+        $process_heap = array();
+        $process_heap_index = array();
+        $found = FALSE;
+
+        // Get elements from heap and process.
+        do {
+          $tag = array_shift($heap_index);
+          $heap_text = array_shift($heap);
+
+          if ($closing_tag == $tag) {
+            // Process the whole tag.
+            $m = array(
+              $tag . ' ' . $heap_text,
+              '',
+              $tag,
+              $heap_text,
+              implode('', $process_heap),
+              '',
+            );
+            $str = _shortcode_process_tag($m);
+            // In shortcode can be used another Format with differents shortcodes, so restore the cache
+            _shortcode_tags($shortcodes_enabled);
+            array_unshift($heap_index, '_string_');
+            array_unshift($heap, $str);
+            $found = TRUE;
+          }
+          else {
+            array_unshift($process_heap, $heap_text);
+            array_unshift($process_heap_index, $tag);
+          }
+        } while (!$found && $heap);
+
+        if (!$found) {
+          foreach ($process_heap as $val) {
+            array_unshift($heap, $val);
+          }
+          foreach ($process_heap_index as $val) {
+            array_unshift($heap_index, $val);
+          }
+        }
+
+      }
+      else {
+        // This is a starting tag. Put it to the heap.
+        array_unshift($heap_index, $tag);
+        array_unshift($heap, implode(' ', $ts));
+      }
+      // If escaped or not a Shortcode.
+    }
+    else {
+      // Maybe not found a pair?
+      array_unshift($heap_index, '_string_');
+      array_unshift($heap, $c);
+    }
+    // End of foreach.
+  }
+
+  return (implode('', array_reverse($heap)));
+}
+
+
+/**
+ * Provides filter tips callback.
+ */
+function _nikadevs_cms_shortcode_filter_tips($filter, $format, $long = FALSE) {
+  $shortcodes = _nikadevs_cms_shortcode_list_all_enabled($format);
+  $tips = array();
+  foreach ($filter->settings as $name => $enabled) {
+    if ($enabled && !empty($shortcodes[$name]['tips callback']) && is_string($shortcodes[$name]['tips callback']) && function_exists($shortcodes[$name]['tips callback'])) {
+      $tips[] = call_user_func_array($shortcodes[$name]['tips callback'], array($format, $long));
+    }
+  }
+  return theme('item_list',
+    array(
+      'title' => t('Shortcodes usage'),
+      'items' => $tips,
+      'type' => 'ol',
+    )
+  );
+}
+
+/**
+ * Returns only enabled Shortcodes for a specified input format.
+ */
+function _nikadevs_cms_shortcode_list_all_enabled($format, $reset = FALSE) {
+  if (is_string($format)) {
+    $format = filter_format_load($format);
+  }
+
+  $shortcodes_enabled = &drupal_static(__FUNCTION__, array());
+
+  if (isset($shortcodes_enabled[$format->format]) && !$reset) {
+    return $shortcodes_enabled[$format->format];
+  }
+  $shortcodes_enabled[$format->format] = array();
+
+  $shortcodes = shortcode_list_all($reset);
+  $filters = filter_list_format($format->format);
+
+  if (empty($filters['shortcode_dynamic'])) {
+    return array();
+  }
+
+  // Run through all Shortcodes defined.
+  foreach ($filters['shortcode_dynamic']->settings as $name => $enabled) {
+    if ($enabled) {
+      $shortcodes_enabled[$format->format][$name] = $shortcodes[$name];
+    }
+  }
+
+  return $shortcodes_enabled[$format->format];
+}

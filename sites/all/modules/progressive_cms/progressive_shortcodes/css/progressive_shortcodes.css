@@ -1,0 +1,11 @@
+@import "/sites/all/themes/progressive/css/style.css";
+.block-md-slider{
+  max-height: 300px;
+  overflow: hidden;
+}
+.banner-set{
+  display: none;
+}
+.sortable-parent #footer{
+  margin: 0;
+}

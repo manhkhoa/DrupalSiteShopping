@@ -1,0 +1,7 @@
+; $Id: 
+name = Progressive theme module
+description = Functions for Progressive theme
+package = "NikaDevs"
+version = "7.x - 1.3"
+core = 7.x
+dependencies[] = media_wysiwyg

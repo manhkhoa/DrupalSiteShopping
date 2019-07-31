@@ -1,0 +1,688 @@
+<?php
+
+/**
+ * Implements hook_user_login().
+ */
+function progressive_cms_user_login(&$edit, $account) {
+  $edit['redirect'] = '<front>';
+}
+
+function progressive_cms_upload_theme_settings() {
+  $exists = db_select('variable', 'v')->fields('v', array('name'))->condition('v.name', 'nikadevs_cms_layout_progressive_sub')->execute()->fetchField();
+  if(!$exists) {
+    $value = file_get_contents(drupal_get_path('module', 'progressive_cms') . '/progressive_layoutbuilder_import/progressive_cms_layout_builder_settings.php');
+    db_insert('variable')->fields(array('value' => $value, 'name' => 'nikadevs_cms_layout_progressive_sub'))->execute();
+  }
+  $exists = db_select('variable', 'v')->fields('v', array('name'))->condition('v.name', 'theme_progressive_sub_settings')->execute()->fetchField();
+  if(!$exists) {
+    $settings = array();
+    $settings['phones'] = 1;
+    $settings['boxed'] = 0;
+    $settings['shop_link'] = 'shop';
+    $settings['shop_link_list'] = 'shop-list';
+    $settings['header_top_menu'] = 1;
+    $settings['account_login'] = 1;
+    $settings['wishlist'] = 1;
+    $settings['comparelist'] = 1;
+    $settings['cart_checkout'] = 1;
+    $settings['skin'] = 'home';
+    $settings['page_404'] = '3';
+    $settings['maintenance_type'] = t('Comming Soon');
+    $settings['under_construction_content']['value'] = '<h4>We are currently under construction!</h4><p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus mi urna, vehicula aliquam dapibus ornare, semper semper nisl. Duis tristique purus sit amet libero condimentum id consequat sem vehicula.  Donec ultricies nunc ac nulla sodales ac imperdiet purus euismod. Sed porta ante auctor accumsan.</p>';
+    $settings['under_construction_content']['format'] = 'html';
+    $settings['under_construction_left']['value'] = '[node admin_url = "node/63/edit"][/node]';
+    $settings['under_construction_left']['format'] = 'dynamic_shortcodes';
+    $settings['under_construction_phones'] = '<strong>Call Us:</strong> +1 (877) 123-45-67
+  <strong>or</strong> +1 (777) 123-45-67';
+    $settings['under_construction_address'] = '49 Archdale, 2B Charleston 5655, Excel Tower
+  OPG Rpad, 4538FH';
+    $settings['under_construction_bottom']['value'] = '<p>Follow us in social media</p>
+[social_box icon = "icon-facebook" link = "http://facebook.com"][/social_box]
+[social_box icon = "icon-twitter" link = "http://facebook.com"][/social_box]
+[social_box icon = "icon-gplus" link = "http://facebook.com"][/social_box]
+[social_box icon = "icon-linkedin" link = "http://facebook.com"][/social_box]';
+    $settings['under_construction_bottom']['format'] = 'html';
+    $settings['coming_soon_timer'] = '2014/12/29 10:00:00';
+    $settings['coming_soon_content']['value'] = '<p>We are currently working on a new website and won\'t take long. Please don\'t forget to check out our tweets and to subscribe to be notified!</p>
+<hr>
+[node admin_url = "node/63/edit"][/node]';
+    $settings['coming_soon_content']['format'] = 'dynamic_shortcodes';
+    $settings['coming_soon_bottom']['value'] = '<p>Follow us in social media</p>
+[social_box icon = "icon-facebook" link = "http://facebook.com"][/social_box]
+[social_box icon = "icon-twitter" link = "http://facebook.com"][/social_box]
+[social_box icon = "icon-gplus" link = "http://facebook.com"][/social_box]
+[social_box icon = "icon-linkedin" link = "http://facebook.com"][/social_box]
+';
+    $settings['coming_soon_bottom']['format'] = 'html';
+    db_insert('variable')->fields(array('name' => 'theme_progressive_sub_settings', 'value' => serialize($settings)))->execute();
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function progressive_cms_init() {
+  global $user;
+  if(variable_get('maintenance_mode', 0) && !$user->uid && !in_array($_GET['q'], array('user', 'user/login'))) {
+    $_GET['q'] = theme_get_setting('maintenance_type') == t('Comming Soon') ? 'content/coming-soon' : 'content/under-construction';
+  }
+  if($_GET['q'] == 'user' && !$user->uid) {
+    $_GET['q'] = 'user/login';
+  }
+  if(in_array($_GET['q'], array('cart', 'cart/checkout')) && strpos($_SERVER['HTTP_HOST'], 'nikadevs') !== FALSE) {
+    $items = uc_cart_get_contents();
+    if(empty($items)) {
+      uc_cart_add_item(19, 1, NULL, NULL, FALSE);
+      uc_cart_add_item(20, 1, NULL, NULL, FALSE);
+    }
+  }
+  if($_GET['q'] == 'product-compare' && strpos($_SERVER['HTTP_HOST'], 'nikadevs') !== FALSE) {
+    $flags = flag_get_user_flags('node');
+    if(!isset($flags['compare'])) {
+      $flag = flag_get_flag('compare');
+      $flag->flag('flag', 21);
+      $flag->flag('flag', 22);
+    }
+  }
+  if($_GET['q'] == 'shop/wishlist' && strpos($_SERVER['HTTP_HOST'], 'nikadevs') !== FALSE) {
+    $flags = flag_get_user_flags('node');
+    if(!isset($flags['wishlist'])) {
+      $flag = flag_get_flag('wishlist');
+      $flag->flag('flag', 21);
+      $flag->flag('flag', 22);
+    }
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function progressive_cms_menu() {
+  progressive_cms_upload_theme_settings();
+  $items['page-404'] = array(
+    'title' => 'Page not Found',
+    'page callback' => 'progressive_cms_page_404',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['page-404-bg'] = array(
+    'title' => 'Page not Found',
+    'page callback' => 'progressive_cms_page_404_bg',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['progressive/save_variable'] = array(
+    'page callback' => 'progressive_cms_save_variable',
+    'access arguments' => array('use nikadevs cms'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['progressive/add-to-cart/%'] = array(
+    'page callback' => 'progressive_cms_add_to_cart',
+    'page arguments' => array(2),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['progressive/remove-from-cart/%/%'] = array(
+    'page callback' => 'progressive_cms_remove_from_cart',
+    'page arguments' => array(2, 3),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['progressive/remove-unflag/%/%'] = array(
+    'page callback' => 'progressive_cms_unflag',
+    'page arguments' => array(2, 3),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['progressive/cart_count'] = array(
+    'page callback' => 'progressive_cms_cart_count',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function progressive_cms_cart_count() {
+  print count(uc_cart_get_contents());
+  return;
+}
+
+function progressive_cms_add_to_cart($nid) {
+  if(isset($_POST['current_url'])) { 
+    $_GET['q'] = str_replace(base_path(), '', $_POST['current_url']);
+  }
+
+  $node = node_load($nid);
+  $form_state['values'] = array();
+  $form_state['build_info']['args'] = array($node);
+  drupal_form_submit('uc_product_add_to_cart_form', $form_state);
+
+  $url = variable_get('uc_add_item_redirect', 'cart');
+  print $url != '<none>' ? url($url) : '';
+  drupal_exit();
+}
+
+function progressive_cms_remove_from_cart($nid, $cart_item_id) {
+  foreach(uc_cart_get_contents() as $item) {
+    // Make sure what this item is under current user Cart
+    if($item->nid == $nid && $item->cart_item_id == $cart_item_id) {
+      uc_cart_remove_item($nid, $item->cart_id, $item->data);
+    }
+  }
+  drupal_exit();
+}
+
+function progressive_cms_unflag($flag_name, $nid) {
+  $flag = flag_get_flag($flag_name);
+  $flag->flag('unflag', $nid);
+  drupal_exit();
+}
+
+function progressive_cms_save_variable() {
+  if(isset($_POST['variable']) && isset($_POST['variable_key'])) {
+    $variable = variable_get($_POST['variable'], array());
+    // If value is not set - remove this
+    if(!isset($_POST['value']) && isset($_POST['variable_key'])) {
+      unset($variable[$_POST['variable_key']]);
+    }
+    elseif(isset($_POST['variable_key'])) {
+      $variable[$_POST['variable_key']] = $_POST['value'];
+    }
+    else {
+      $variable = $_POST['value'];
+    }
+    variable_set($_POST['variable'], $variable);
+  }
+  drupal_exit();
+}
+
+function progressive_cms_page_404() {
+  if(theme_get_setting('page_404') == 1 && arg(1) != 'content') {
+    return theme('progressive_cms_page_404');
+  }
+  else {
+    drupal_set_title('Page 404 (2)');
+    $page_404_content = theme_get_setting('page_404_content');
+    $content = check_markup($page_404_content['value'], $page_404_content['format']);
+    return theme('progressive_cms_page_404_content', array('content' => $content));
+  }
+}
+
+function progressive_cms_page_404_bg() {
+  drupal_add_js(drupal_get_path('theme', 'progressive') . '/js/pixastic.custom.js');
+  return t('Page not Found');
+}
+
+/**
+ * Implements hook_menu().
+ */
+function progressive_cms_block_info() {
+  $blocks = array();
+
+  $blocks['menu'] = array(
+    'info' => t('Progressive: Main Menu'),
+    'cache' => DRUPAL_NO_CACHE,
+    'region' => 'top',
+    'status' => 1
+  );
+  $blocks['footer_copyright'] = array(
+    'info' => t('Progressive: Footer Copyright'),
+    'cache' => DRUPAL_CACHE_GLOBAL,
+    'region' => 'content',
+    'status' => 0
+  );
+  $blocks['breadcrumbs'] = array(
+    'info' => t('Progressive: Breadcrumbs'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+    'region' => 'content',
+    'status' => 0
+  );
+  $blocks['breadcrumbs_line'] = array(
+    'info' => t('Progressive: Breadcrumbs line'),
+    'cache' => DRUPAL_CACHE_GLOBAL,
+    'region' => 'content',
+    'status' => 0
+  );
+  $blocks['page_title'] = array(
+    'info' => t('Progressive: Page Title'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+    'region' => 'content',
+    'status' => 0
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implementation of hook_block_configure().
+ */
+function progressive_cms_block_configure($delta = '') {
+  $form = array();
+  switch($delta) {
+    case 'footer_copyright':
+      $settings = variable_get('theme_' . variable_get('theme_default', '') . '_footer_copyright', array());
+      $form['copyright'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Copyright Text'),
+        '#default_value' => isset($settings['copyright']) ? $settings['copyright'] : '',
+      );
+      $form['phones'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Phones'),
+        '#default_value' => isset($settings['phones']) ? $settings['phones'] : '',
+        '#rows' => 3
+      );
+      $form['address'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Address'),
+        '#default_value' => isset($settings['address']) ? $settings['address'] : '',
+        '#rows' => 3
+      );
+
+      break;
+  }
+  return $form;
+}
+
+/**
+ * Implementation of hook_block_save().
+ */
+function progressive_cms_block_save($delta = '', $edit = array()) {
+  switch($delta) {
+    case 'footer_copyright':
+      variable_set('theme_' . variable_get('theme_default', '') . '_footer_copyright', $edit);
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_view().
+ */
+function progressive_cms_block_view($delta) {
+  $block = array();
+  switch ($delta) {
+    case 'menu':
+      $block = array(
+        'subject' => '',
+        'content' => theme('progressive_cms_menu')
+      );
+      break;
+    case 'footer_copyright':
+      $settings = variable_get('theme_' . variable_get('theme_default', '') . '_footer_copyright', array());
+      $block = array(
+        'subject' => '',
+        'content' => theme('progressive_cms_footer_copyright', array('settings' => $settings))
+      );
+      break;
+    case 'breadcrumbs':
+      $breadcrumb = drupal_get_breadcrumb();
+      if (!empty($breadcrumb)) {
+        if (!drupal_is_front_page() && !empty($breadcrumb)) {
+          $node_title = filter_xss(menu_get_active_title(), array());
+          $breadcrumb[] = $node_title;
+        }
+        if (count($breadcrumb) == 1) {
+          $breadcrumb = array();
+        }
+      }
+      $block = array(
+        'subject' => '',
+        'content' => theme('progressive_cms_breadcrumbs', array('items' => $breadcrumb))
+      );
+      break;
+    case 'breadcrumbs_line':
+      $block = array(
+        'subject' => '',
+        'content' => theme('progressive_cms_breadcrumbs_line')
+      );
+      break;
+    case 'page_title':
+      $title = drupal_get_title();
+      if($title) {
+        $block = array(
+          'subject' => '',
+          'content' => theme('progressive_cms_page_title', array('title' => $title))
+        );
+      }
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function progressive_cms_theme($existing, $type, $theme, $path) {
+  return array(
+    'progressive_cms_menu' => array(
+      'variables' => array(),
+    ),
+    'progressive_cms_breadcrumbs_line' => array(
+      'variables' => array(),
+    ),
+    'progressive_cms_footer_copyright' => array(
+      'variables' => array('settings' => ''),
+    ),
+    'progressive_cms_breadcrumbs' => array(
+      'variables' => array('items' => array()),
+    ),
+    'progressive_cms_page_title' => array(
+      'variables' => array('title' => array()),
+    ),
+    'progressive_cms_page_404' => array(
+      'variables' => array(),
+    ),
+    'progressive_cms_page_404_content' => array(
+      'variables' => array('content' => ''),
+    ),
+    'progressive_cms_cart_block' => array(
+      'variables' => array('items' => array()),
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function progressive_cms_theme_registry_alter(&$theme_registry) {
+  $theme_registry['nikadevs_cms_block_settings']['path'] = drupal_get_path('theme', 'progressive') . '/templates';
+}
+
+function progressive_cms_preprocess_block(&$variables) {
+  $settings = variable_get('nikadevs_cms_block_settings_' . variable_get('theme_default', 'none'), array());
+
+  $variables['title_tag'] = 'h1';
+  $id = $variables['block']->module . '_' . $variables['block']->delta;
+  if(isset($settings[$id])) {
+    if(isset($settings[$id]['animation']) && !empty($settings[$id]['animation'])) {
+      $variables['attributes_array']['data-appear-animation'] = $settings[$id]['animation'];
+      unset($variables['attributes_array']['data-animation'], $variables['attributes_array']['data-animation-delay']);
+    }
+    $variables['title_tag'] = isset($settings[$id]['title_tag']) ? $settings[$id]['title_tag'] : 'h1';
+  }
+}
+
+/**
+ * Implements hook_custom_theme().
+ */
+function progressive_cms_custom_theme() {
+  // Allow the user to login with default theme
+  if (isset($_GET['theme']) && $_GET['theme'] == 'seven' && ($_GET['q'] == 'user' || $_GET['q'] == 'user/login')) {
+    return 'seven';
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function progressive_cms_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form_id) {
+    case 'menu_edit_item':
+      if (isset( $form['link_path']['#default_value'])) {
+        $form['link_path']['#default_value'] = str_replace('http://_anchor_', '#', $form['link_path']['#default_value']);
+        array_unshift($form['#validate'], 'progressive_cms_menu_edit_item_validate');        
+      }
+      break;
+    case 'user_login':
+      $form['#prefix'] = '<h3 class="title">' . t('Sign In');
+      $form['#prefix'] .= ' <small>' . t('or') . ' ' . l(t('Sign Up'), 'user/register', array('attributes' => array('class' => array('sign-up')))) . '</small></h3>';
+      $form['#prefix'] .= '<p>' . t('If you have an account with us, please log in.') . '</p>';
+      $form['actions']['#attributes']['class'] = array('buttons-box clearfix');
+      $form['actions']['submit']['#suffix'] = l(t('Forgot Your Password?'), 'user/password', array('attributes' => array('class' => array('forgot'))));
+      $form['actions']['submit']['#suffix'] .= '<span class="required"><b>*</b> ' . t('Required Field') . '</span>';
+      break;
+    case 'user_pass':
+      $form['#prefix'] = '<h3 class="title">' . t('Retrieve your password here') . '</h3>';
+      $form['#prefix'] .= '<p>' . t('Please enter your email address below. You will receive a link to reset your password.') . '</p>';
+      $form['actions']['#attributes']['class'] = array('buttons-box clearfix');
+      $form['actions']['submit']['#suffix'] = l('<i class="fa fa-long-arrow-left"></i> ' .t('Back to Login'), 'user/login', array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-border', 'btn-inverse', 'sing-in'))));
+      $form['actions']['submit']['#suffix'] .= '<span class="required"><b>*</b> ' . t('Required Field') . '</span>';
+      break;
+    case 'user_register_form':
+      $form['#prefix'] = '<h3 class="title">' . t('Sign Up') . '</h3>';
+      $form['actions']['#attributes']['class'] = array('buttons-box clearfix');
+      $form['actions']['submit']['#suffix'] = l('<i class="fa fa-long-arrow-left"></i> ' . t('Back to Login'), 'user/login', array('html' => TRUE, 'attributes' => array('class' => array('btn', 'btn-border', 'btn-inverse', 'sing-in'))));
+      $form['actions']['submit']['#suffix'] .= '<span class="required"><b>*</b> Required Field</span>';
+      break;
+    case 'comment_node_blog_form':
+      $col_md_6 = array(
+        '#prefix' => '<div class = "row"><div class = "col-sm-6 col-md-6">',
+        '#suffix' => '</div></div>'
+      );
+      $form['author'] = array_merge($form['author'], $col_md_6);
+      $form['subject'] = array_merge($form['subject'], $col_md_6);
+      $form['comment_body']['#prefix'] = '<div class = "row"><div class = "col-sm-10 col-md-10">';
+      $form['comment_body']['#suffix'] = '</div></div>';
+      break;
+    case 'blog_node_form':
+      $form['field_images']['#states'] = array(
+        'visible' => array(
+          '.field-name-field-media-type select' => array('value' => 'Images'),
+        )
+      );
+      // No break - we need to go to next operand
+    case 'project_node_form':
+      $form['field_video_url']['#states'] = array(
+        'visible' => array(
+          '.field-name-field-media-type select' => array('value' => 'Video'),
+        )
+      );
+      break;
+    case 'contact_site_form':
+      $form['#attributes']['class'] = array_merge($form['#attributes']['class'], array('register-form', 'form-box'));
+      $form['actions']['submit']['#value'] = t('Submit');
+      break;
+    case 'search_block_form':
+      $form['search_block_form']['#attributes']['placeholder'] = t('Search here');
+      $form['search_block_form']['#attributes']['class'][] = 'search-string';
+      $form['search_block_form']['#suffix'] = '<button class="search-submit">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+        <path fill="#231F20" d="M12.001,10l-0.5,0.5l-0.79-0.79c0.806-1.021,1.29-2.308,1.29-3.71c0-3.313-2.687-6-6-6C2.687,0,0,2.687,0,6
+        s2.687,6,6,6c1.402,0,2.688-0.484,3.71-1.29l0.79,0.79l-0.5,0.5l4,4l2-2L12.001,10z M6,10c-2.206,0-4-1.794-4-4s1.794-4,4-4
+        s4,1.794,4,4S8.206,10,6,10z"></path>
+      </image></svg>
+      </button>';
+      break;
+    case 'search_form':
+      unset($form['basic']['keys']['#title'], $form['#attributes']);
+      $form['basic']['#prefix'] = '<div class = "search-form">';
+      $form['basic']['#suffix'] = '</div>';
+      $form['#attributes']['class'] = array('search-result');
+      $form['basic']['keys']['#attributes']['placeholder'] = t('Search here...');
+      $form['basic']['keys']['#attributes']['class'][] = 'search-string';
+      $form['basic']['keys']['#suffix'] = '<button class="search-submit">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+        <path fill="#231F20" d="M12.001,10l-0.5,0.5l-0.79-0.79c0.806-1.021,1.29-2.308,1.29-3.71c0-3.313-2.687-6-6-6C2.687,0,0,2.687,0,6
+        s2.687,6,6,6c1.402,0,2.688-0.484,3.71-1.29l0.79,0.79l-0.5,0.5l4,4l2-2L12.001,10z M6,10c-2.206,0-4-1.794-4-4s1.794-4,4-4
+        s4,1.794,4,4S8.206,10,6,10z"></path>
+      </image></svg>
+      </button>';
+      break;
+    case 'user_login':
+    case 'user_register_form':
+    case 'user_pass':
+      $form['#prefix'] = '<div class = "box">';
+      $form['#suffix'] = '</div>';
+      break;
+    case 'uc_cart_view_form':
+      $form['items']['#prefix'] = '<div class = "table-box">';
+      $form['items']['#suffix'] = '</div>';
+      $form['items']['#columns']['remove']['weight'] = 6;
+      $form['items']['#columns']['remove']['cell'] = array('data' => '', 'class' => 'td-remove');
+      $form['items']['#columns']['remove']['class'] = 'td-remove';
+      $form['items']['#columns']['total']['weight'] = 5;
+      $form['items']['#columns']['total']['cell'] = array('data' => t('Subtotal'), 'class' => 'td-total');
+      $form['items']['#columns']['qty']['weight'] = 4;
+      $form['items']['#columns']['qty']['cell'] = array('data' => t('Qty'), 'class' => 'td-qty');
+      $form['items']['#columns']['price'] = array(
+        'cell' => array('data' => t('Unit Price'), 'class' => 'td-price'),
+        'weight' => 3,
+        'class' => 'td-price'
+      );
+      $form['items']['#columns']['desc']['cell'] = array('data' => t('Product Name'), 'class' => 'td-name');
+      $form['items']['#columns']['image'] = array(
+        'cell' => array('data' => '', 'class' => 'td-images'),
+        'weight' => -1,
+      );
+      $form['items']['#attributes']['class'] = array('shopping-cart-table', 'table', 'table-bordered', 'table-striped');
+      foreach (element_children($form['items']) as $key) {
+        if (!empty($form['items']['#parameters'][1][$key]['nid'])) {
+          $node = node_load($form['items']['#parameters'][1][$key]['nid']['#value']);
+          $form['items'][$key]['price'] = array(
+            '#markup' => theme('uc_product_price', array('element' => array('#value' => $node->sell_price))),
+          );
+          $form['items'][$key]['image']['#image_style'] = 'product_70x70';
+          $form['items'][$key]['desc']['#prefix'] = '<h2 class = "product-name">';
+          $form['items'][$key]['desc']['#suffix'] = '</h2>';
+          $form['items'][$key]['remove']['#attributes']['class'] = array('hidden');
+          $form['items'][$key]['remove']['#suffix'] = '<a href="#" class="product-remove button-click">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 16 16" enable-background="new 0 0 16 16" xml:space="preserve">
+              <g>
+              <path fill="#7f7f7f" d="M6,13c0.553,0,1-0.447,1-1V7c0-0.553-0.447-1-1-1S5,6.447,5,7v5C5,12.553,5.447,13,6,13z"></path>
+              <path fill="#7f7f7f" d="M10,13c0.553,0,1-0.447,1-1V7c0-0.553-0.447-1-1-1S9,6.447,9,7v5C9,12.553,9.447,13,10,13z"></path>
+              <path fill="#7f7f7f" d="M14,3h-1V1c0-0.552-0.447-1-1-1H4C3.448,0,3,0.448,3,1v2H2C1.447,3,1,3.447,1,4s0.447,1,1,1
+              c0,0.273,0,8.727,0,9c0,1.104,0.896,2,2,2h8c1.104,0,2-0.896,2-2c0-0.273,0-8.727,0-9c0.553,0,1-0.447,1-1S14.553,3,14,3z M5,2h6v1
+              H5V2z M12,14H4V5h8V14z"></path>
+              </g>
+            </svg>
+          </a>';
+          $form['items'][$key]['qty']['#attributes']['class'] = array('form-control');
+          $form['items'][$key]['image']['#cell_attributes'] = array('class' => 'td-images');
+          $form['items'][$key]['desc']['#cell_attributes'] = array('class' => 'td-name');
+          $form['items'][$key]['price']['#cell_attributes'] = array('class' => 'td-price');
+          $form['items'][$key]['qty']['#cell_attributes'] = array('class' => 'td-qty');
+          $form['items'][$key]['total']['#cell_attributes'] = array('class' => 'td-total');
+          $form['items'][$key]['remove']['#cell_attributes'] = array('class' => 'td-remove');
+        }
+        else {
+          // Get grand total value
+          $form['actions']['total'] = $form['items'][$key]['total'];
+          $form['actions']['total']['#prefix'] = '<span id="subtotal-title">' . t('Grand Total') . '</span>';
+          $form['actions']['total']['#weight'] = -100;
+          unset($form['items'][$key]);
+        }
+      }
+      // Table with continue link and update cart
+      $form['continue_update'] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('shopping-cart-table', 'shopping-cart-table-button', 'table', 'action', 'no-border'))
+      );
+      if(isset($form['actions']['continue_shopping'])) {
+        $form['continue_update']['continue_shopping'] = $form['actions']['continue_shopping'];
+        $form['continue_update']['continue_shopping']['#weight'] = -10;
+        $form['continue_update']['continue_shopping']['#prefix'] = '<span class = "float-left"><i class="fa fa-angle-left"></i> ';
+        $form['continue_update']['continue_shopping']['#suffix'] = '</span>';
+      }
+      $form['continue_update']['update'] = $form['actions']['update'];
+      $form['continue_update']['update']['#weight'] = -5;
+      $form['continue_update']['update']['#attributes'] = array('class' => array('hidden'));
+      $form['continue_update']['update']['#suffix'] = '<a href="#" class="update button-click"><i class="fa fa-rotate-right"></i> ' . t('Update Shopping Cart') . '</a><br class = "clearfix">';
+
+      $form['actions']['checkout']['checkout']['#value'] = t('Proceed to Checkout');
+      $form['actions']['checkout']['checkout']['#attributes']['class'] = array('btn', 'checkout', 'btn-default', 'btn-lg');
+      $form['actions']['#prefix'] = '<div id="car-bottom" class="row"><div class="col-sm-4 col-md-4 float-right"><div class="car-bottom-box bg total">';
+      $form['actions']['#suffix'] = '<a href = "' . url('cart/checkout') . '" class="multiple no-border button-click">' . t('Go to confirmation page') . '</a></div></div></div>';
+      unset($form['actions']['continue_shopping'], $form['actions']['update']);
+      break;
+  }
+  if(strpos($form_id, 'uc_product_add_to_cart') !== FALSE) {
+    $form['#attributes']['class'] = array('add-cart-form');
+    $form['actions']['submit']['#attributes']['class'][] = 'add-cart btn-default btn-lg';
+    $form['qty']['#weight'] = 1000;
+    $form['qty']['#prefix'] = '<div class="number">';
+    $form['qty']['#attributes']['class'] = array('form-control');
+    $form['qty']['#suffix'] = '<div class="regulator">
+        <a href="#" class="number-up"></a>
+        <a href="#" class="number-down"></a>
+      </div>
+    </div>';
+  }
+}
+
+function _get_node_field($node, $field, $lang = 'en') {
+  global $language;
+  $var = FALSE;
+  if(!empty($node->{$field}[$lang])) {
+      $var = $node->{$field}[$lang];
+  } elseif(!empty($node->{$field}[$language->language])) {
+      $var = $node->{$field}[$language->language];
+  } elseif(!empty($node->{$field}['und'])) {
+      $var = $node->{$field}['und'];
+  } elseif(!empty($node->{$field})) {
+      $var = $node->{$field};
+  }
+  return $var;
+}
+
+function progressive_cms_blog_timeline_form($form, $form_state, $attrs) {
+  $form = array();
+  $form['id'] = array(
+    '#type' => 'hidden',
+    '#value' => $attrs['id']
+  );
+  $form['livicon'] = array(
+    '#title' => t('Livicon'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'admin/ajax/progressive_shortcodes/livicons_autocomplete',
+    '#default_value' => isset($attrs['livicon']) ? $attrs['livicon'] : '',
+    '#attributes' => array('class' => array('form-control')),
+  );
+  $colors = array('black' => t('Black'), 'danger' => t('Red'), 'info' => t('Blue'), 'warning' => t('Orange'), 'success' => t('Green'), 'primary' => t('Dark Blue'));
+  $form['color'] = array(
+    '#type' => 'radios',
+    '#title' => t('Color'),
+    '#options' => $colors,
+    '#default_value' => isset($attrs['color']) ? $attrs['color'] : 'btn-info',
+    '#attributes' => array('class' => array('color-radios', 'no-styles')),
+  );
+  $form['tranparent_bg'] = array(
+    '#title' => t('Transparent Background'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['tranparent_bg']) ? $attrs['tranparent_bg'] : TRUE,
+    '#attributes' => array('class' => array('no-styles')),
+  );
+  $form['title'] = array(
+    '#title' => t('Show Title'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['title']) ? $attrs['title'] : FALSE,
+    '#attributes' => array('class' => array('no-styles')),
+  );
+  $form['no_padding'] = array(
+    '#title' => t('No Padding'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['no_padding']) ? $attrs['no_padding'] : FALSE,
+    '#attributes' => array('class' => array('no-styles')),
+  );
+  $form['save'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#ajax' => array(
+      'callback' => 'progressive_cms_blog_timeline_form_submit',
+      'wrapper' => 'doesnt-matter',
+      'effect' => 'fade',
+      'method' => 'replace',
+    )
+  );
+  return $form;
+}
+
+function progressive_cms_blog_timeline_form_submit($form, $form_state) {
+  $settings = variable_get('progressive_cms_blog_timeline', array());
+  $settings[$form_state['values']['id']] = $form_state['values'];
+  variable_set('progressive_cms_blog_timeline', $settings);
+  $commands[] = array(
+    'command' => 'progressive_cms_blog_timeline',
+    'selector' => $form['#id'],
+    'data' => $form_state['values'],
+  );
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+
+function progressive_cms_menu_edit_item_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  if(strpos($values['link_path'], '#') === 0) {
+    $values['link_path'] = str_replace('#', 'http://_anchor_', $values['link_path']);
+    form_set_value(array('#parents' => array('link_path')), $values['link_path'], $form_state);
+  }
+}

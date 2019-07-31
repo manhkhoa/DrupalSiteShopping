@@ -1,0 +1,10 @@
+<?php
+
+
+function progressive_cms_install() {
+  variable_set('site_404', 'page-404-bg');
+}
+
+function progressive_cms_uninstall() {
+  db_delete('variable')->condition('name', 'nikadevs_cms_layout_progressive_sub')->execute();;
+}

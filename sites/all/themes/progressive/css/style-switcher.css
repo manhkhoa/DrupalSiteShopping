@@ -1,0 +1,119 @@
+.style-switcher {
+  position: fixed;
+  top: 80px;
+  left: -200px;
+  z-index: 2000;
+  width: 200px;
+  border-radius: 0 0 6px;
+  background: #3d3d3d;
+}
+.style-switcher h3 {
+  margin: 0;
+  padding: 5px 0 5px 20px;
+  background: #494949;
+  color: #fff;
+  text-transform: none;
+  font-size: 17px;
+  line-height: 30px;
+  font-weight: 200;
+}
+.style-switcher h3 a {
+  position: absolute;
+  top: 0;
+  right: -40px;
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 0 5px 5px 0;
+  background-color: #494949;
+  color: #FFF;
+  text-align: center;
+  text-decoration: none;
+  font-size: 24px;
+  line-height: 40px;
+}
+.style-switcher h3 a .fa {
+  color: #fff;
+  margin-right: 4px;
+}
+.style-switcher-body {
+  padding: 20px;
+}
+.style-switcher-body h4 {
+  font-size: 17px;
+  font-weight: normal;
+  color: #fff;
+  margin-bottom: .5em;
+}
+.style-switcher-body ul {
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.styles-switcher-colors {
+  list-style: none;
+  padding: 0;
+  overflow: hidden;
+  margin-bottom: -10px;
+  margin-right: -10px;
+}
+.styles-switcher-colors li {
+  float: left;
+  margin: 0 10px 10px 0;
+}
+.styles-switcher-colors li a {
+  display: block;
+  width: 32px;
+  height: 32px;
+  background: #dc2a0b;
+  border: 1px solid transparent;
+}
+.styles-switcher-colors li a:hover {
+  border-color: #fff;
+}
+.styles-switcher-colors li a.color-elements{
+  background: #f89406;
+}
+.styles-switcher-colors li a.color-home{
+  background: #c10841;
+}
+.styles-switcher-colors li a.color-pages{
+  background: #0098ca;
+}
+.styles-switcher-colors li a.color-shop-5{
+  background: #58a12b;
+}
+.styles-switcher-colors li a.color-shop-6{
+  background: #00c59c;
+}
+.styles-switcher-colors li a.color-shop-8{
+  background: #4c6b99;
+}
+.styles-switcher-colors li a.color-shop{
+  background: #40499b;
+}
+
+/* Layouts */
+.buttons-switcher {
+  list-style: none;
+  padding: 0 0 10px 0;
+}
+.buttons-switcher li {
+  float: right;
+  width: 45%;
+  text-align: center;
+}
+.buttons-switcher li:first-child {
+  float: left;
+}
+.buttons-switcher li a {
+  display: block;
+  border: 2px solid rgba(255,255,255,.1);
+  padding: 5px 0;
+  color: #fff;
+}
+.buttons-switcher li a:hover,
+.buttons-switcher li a.active {
+  text-decoration: none;
+  background: rgba(255,255,255,.1);
+}

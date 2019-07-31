@@ -1,0 +1,280 @@
+body{
+ direction: rtl;
+}
+ul, ol {
+  padding: 0 60px 0 0;
+}
+.list-unstyled{
+  padding: 0;
+}
+.nav li,
+.product-price,
+.product-name,
+.pricing .price-box,
+.pricing .title,
+.rotation.hover .employee-hover,
+.slider .slid-content .title,
+.slider .slid-content .descriptions,
+.list .product .reviews-box,
+.list .product .price-box,
+.products.list .product .actions,
+.shopping-cart-table.table .td-name,
+.uc-store-address-field .form-item label{
+  text-align: right;
+}
+.pricing .bottom-box .rating-box,
+.pricing .price-box .icon,
+.carousel > div,
+.title-box + div .carousel-pagination,
+.sliders-box > div,
+.header .primary .navbar .nav .sub .item-new,
+.header .primary .navbar .nav .megamenu .sub a .item-new,
+.header .header-icons,
+.phone-active .close,
+.search-active .close{
+  float: left !important;
+}
+.pricing .bottom-box .more,
+.qty-block,
+.social .sbtnf,
+.progress-bar,
+.respond .name,
+.comment-form .row > div,
+.pagination > li,
+.sidebar .tags li,
+.employee .employee-hover .social .item,
+.employee .employee-hover .contact,
+.employee .employee-hover .contact b,
+.features-block .header-box .icon-box,
+.toolbar .price-regulator b,
+.reviews-box .review-count,
+.uc-store-address-field .form-item label,
+.tabs .nav-tabs li,
+.header .logo-box,
+.header .primary,
+.phone-active .title{
+  float: right;
+}
+.product .product-hover .price,
+.pricing .options li,
+.progress-bar,
+.product .product-hover ul li,
+.respond .description,
+.list .product .excerpt{
+  text-align: right;
+}
+.sale,
+.title-box .btn,
+.carousel-pagination,
+.phone-active,
+.search-active,
+.search-active .close,
+.newsletter-submit{
+  left: 0;
+}
+.progress-circular,
+.product-page .col-md-7 .actions,
+.steps,
+.new-radio, .new-checkbox,
+.nav-box .container{
+  direction: ltr;
+}
+.title-box .btn,
+.header .cart-header .dropdown-menu,
+.search-active .close,
+.phone-active,
+.search-active,
+.newsletter-submit{
+  right: auto;
+}
+.title-box .btn, .header .cart-header .dropdown-menu,
+.header .cart-header.open .dropdown-toggle:after {
+  left: 0;
+}
+.header .cart-header .dropdown-toggle .icon{
+  margin: 0 0 0 8px;
+}
+.qty-block{
+  margin: 0 0 0 8px;
+}
+.product-price,
+.product-name{
+  margin-right: 10px !important;
+}
+.webform-component--email input{
+  padding-right: 30px;
+}
+.social .sbtnf{
+  margin: 0 0 0 10px;
+}
+.timeline .post:nth-child(odd) {
+  margin-right: 50%;
+}
+html.js fieldset.collapsed .fieldset-legend{
+  background-image: none;
+}
+@media (min-width: 768px) {
+  .filter-list.filter-buttons .dropdown-menu > li {
+    float: right;
+    margin: 0 0 10px 20px;
+  }
+}
+.pricing .options li{
+  padding: 13px 45px 13px 13px;
+}
+.pricing .options li span{
+  right: 25px;
+}
+.title-box:before{
+  right: 0;
+}
+.title-box.text-center:before {
+  right: auto;
+  left: 50%;
+}
+.sale span{
+  margin: -46px -34px 0 0;
+}
+.product .default .product-name{
+  text-align: center;
+}
+.product .product-hover .product-name,
+.form-actions .btn:first-child {
+  margin-right: 0 !important;
+}
+.product .product-hover ul li {
+  background-position-x: right;
+  padding: 0 15px 0 0;
+  margin-right: 5px;
+}
+.employee .employee-hover .social {
+  right: 10px;
+}
+.carousel-box .next, .carousel-box .prev{
+  display: inline-block !important;
+  margin: 0 10px 0 0;
+}
+.respond .name .icon{
+  margin-left: 5px;
+}
+.sidebar .widget ol,
+.sidebar .widget ul,
+.view ul,
+.item-list ul {
+  padding-right: 0;
+  list-style: none;
+}
+.sidebar .widget ol li,
+.sidebar .widget ul li,
+.view ul li,
+.item-list ul li{
+  margin: 0;
+}
+.post .entry-meta .comments-link {
+  margin-left: 15px;
+}
+.sidebar .tags li {
+  margin: 0 3px 3px 0 !important;
+}
+.comment-reply {
+  margin-left: 12px;
+}
+.page-header .container:before {
+  right: 15px;
+}
+.pagination-box .pagination {
+  margin: 0 -5px 0;
+  padding: 0;
+}
+.pagination > li {
+  margin: 0 !important;
+}
+.pagination-box {
+  margin: 70px 0 0;
+}
+.year-regulator .label {
+  padding: 0 0 0 20px;
+}
+.features-block .header-box .icon-box {
+  margin: 0 0 0 10px;
+}
+.under-contact .footer-icon {
+  right: 0px;
+}
+.under-contact .phone, .under-contact .address {
+  padding: 0 34px 0 0;
+}
+.toolbar .price-regulator b {
+  margin-left: 10px;
+}
+.toolbar .selectBox {
+  margin: 0 3px 0 15px;
+}
+.view-blog .view-footer-pager,
+.view-modern-gallery .view-footer-pager{
+  margin-top: 0;
+  float: left;
+}
+.form-actions .btn {
+  margin-right: 15px !important;
+}
+.list .product .product-name{
+  margin-right: 0 !important;
+}
+.new-radio, .new-checkbox {
+  margin: 2px -20px 0 0px;
+}
+.radio, .checkbox {
+  padding: 0 20px 0 0;
+}
+blockquote {
+  padding: 0 20px 0 0;
+  margin: 0 0 22px;
+  border-right: 2px solid #e1e1e1;
+  border-left: none;
+}
+.tabs .nav-tabs{
+  padding: 0;
+}
+.tabs .nav-tabs li a i{
+  padding-left: 5px; 
+}
+.tabs.tabs-left .nav-tabs li,
+.tabs.tabs-right .nav-tabs li{
+  float: none;
+}
+.header .cart-header.open .dropdown-toggle:after{
+  right: -3px;
+}
+.phone-active .title{
+  padding-left: 15px;
+}
+.search-active .close{
+  margin-left: 31px;
+}
+.newsletter-submit{
+  -moz-transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+  transform: rotateY(180deg);
+}
+@media (max-width: 991px){
+  .header .primary{
+    float: left !important;
+  }
+  .header .primary .navbar .btn-navbar .text{
+    padding: 0 35px 0 0;
+  }
+  .header .primary .navbar .btn-navbar.collapsed:before{
+    display: none;
+  }
+  .header .primary .navbar .navbar-collapse{
+    left: 0;
+    right: auto;
+  }
+  .header .primary .navbar .nav .open-sub span + span {
+    margin: 10px 7px 0 19px;
+  }
+  .header .primary .sub{
+    width: auto !important;
+  }
+}

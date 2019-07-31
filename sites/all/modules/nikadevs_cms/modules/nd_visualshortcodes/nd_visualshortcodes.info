@@ -1,0 +1,15 @@
+name = NikaDevs Visual Shortcodes
+description = Visual Shortcodes Editor
+package = "NikaDevs"                                                        
+core = 7.x
+
+dependencies[] = filter
+dependencies[] = shortcode
+dependencies[] = media_wysiwyg
+dependencies[] = jquery_update
+
+configure = admin/config/content/nd_visualshortcodes
+
+version = "7.x-1.2"
+core = "7.x"
+project = "NikaDevs"

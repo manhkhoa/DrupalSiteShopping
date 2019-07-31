@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Progressive Content feature.
+ */
+
+include_once 'progressive_content.features.inc';

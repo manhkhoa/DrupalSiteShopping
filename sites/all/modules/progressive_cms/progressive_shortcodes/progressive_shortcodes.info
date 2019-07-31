@@ -1,0 +1,6 @@
+; $Id: 
+name = Progressive Shortcodes
+description = Shortcodes for Progressive theme
+package = "NikaDevs"
+version = "7.x - 1.3"
+core = 7.x

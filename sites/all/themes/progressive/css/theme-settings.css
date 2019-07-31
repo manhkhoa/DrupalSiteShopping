@@ -1,0 +1,45 @@
+.form-item label {
+  display: block;
+}
+.form-type-checkbox label{
+  display: inline-block;
+}
+
+/* Color Radios */
+.color-radios input[type="radio"] {
+  display:none;
+}
+.color-radios .form-item{
+  display: inline-block;
+}
+.color-radios label {
+  display: inline-block !important;
+  width: 32px;
+  height: 32px;
+  border: 2px solid transparent !important;
+  text-indent: -9999px;
+}
+.color-radios input[type="radio"]:checked + label {
+  border: 2px solid #3d3d3d !important;
+}
+#edit-skin-elements + label{
+  background: #f89406;
+}
+#edit-skin-home + label{
+  background: #c10841;
+}
+#edit-skin-pages + label{
+  background: #0098ca;
+}
+#edit-skin-shop-5 + label{
+  background: #58a12b;
+}
+#edit-skin-shop-6 + label{
+  background: #00c59c;
+}
+#edit-skin-shop-8 + label{
+  background: #4c6b99;
+}
+#edit-skin-shop + label{
+  background: #40499b;
+}

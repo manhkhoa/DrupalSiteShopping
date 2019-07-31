@@ -1,0 +1,3013 @@
+<?php
+
+/**
+ * Implementation of hook_menu().
+ */
+function progressive_shortcodes_menu() {
+  variable_set('nd_visualshortcodes_extra_css', drupal_get_path('module', 'progressive_shortcodes') . '/css/progressive_shortcodes.css');
+  $items = array();
+  $items['admin/ajax/progressive_shortcodes/livicons_autocomplete'] = array(
+    'page callback' => 'progressive_shortcodes_ajax_livicons_autocomplete',
+    'access arguments' => array('administer nd visualshortcodes'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/ajax/progressive_shortcodes/socialbox_autocomplete'] = array(
+    'page callback' => 'progressive_shortcodes_ajax_socialbox_autocomplete',
+    'access arguments' => array('administer nd visualshortcodes'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Return array with region ID and his HTML class name
+*/
+function progressive_shortcodes_theme() {
+   return array(
+    'progressive_shortcodes_shortcode_chart_settings' => array(
+      'render element' => 'form'
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_shortcode_info() .
+ * Using the same formatting as hook_filter_info()
+ */
+function progressive_shortcodes_shortcode_info() {
+  $shortcodes['quote'] = array(
+    'title' => t('Quote'),
+    'description' => t('Replace the given text formatted like as a quote.'),
+    'process callback' => 'progressive_shortcodes_shortcode_quote',
+    'process settings callback' => 'progressive_shortcodes_shortcode_quote_settings',
+    'icon' => 'fa fa-quote-right',
+    'tips callback' => 'progressive_shortcodes_shortcode_quote_tip',
+    'child shortcode' => 'html',
+    'description_field' => 'author',
+  );
+  $shortcodes['testimonial'] = array(
+    'title' => t('Testimonial'),
+    'description' => t('Testimonial with image'),
+    'process callback' => 'progressive_shortcodes_shortcode_testimonial',
+    'process settings callback' => 'progressive_shortcodes_shortcode_testimonial_settings',
+    'icon' => 'fa fa-comment',
+    'tips callback' => 'progressive_shortcodes_shortcode_quote_tip',
+    'child shortcode' => 'html',
+    'description_field' => 'author',
+  );
+  $shortcodes['progress'] = array(
+    'title' => t('Progress Line'),
+    'description' => t('Progress line with title and percents.'),
+    'process callback' => 'progressive_shortcodes_shortcode_progress',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'process settings callback' => 'progressive_shortcodes_shortcode_progress_settings',
+    'icon' => 'fa fa-tasks',
+    'tips callback' => 'progressive_shortcodes_shortcode_progress_tip',
+    'description_field' => 'title',
+  );
+  $shortcodes['spacer'] = array(
+    'title' => t('Spacer'),
+    'description' => t('Spacer without any content.'),
+    'process callback' => 'progressive_shortcodes_shortcode_spacer',
+    'process settings callback' => 'progressive_shortcodes_shortcode_spacer_settings',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'tips callback' => 'progressive_shortcodes_shortcode_spacer_tip',
+    'icon' => 'fa fa-square-o',
+    'description_field' => 'height',
+  );
+  $shortcodes['container'] = array(
+    'title' => t('Container box'),
+    'description' => t('Container for content.'),
+    'process callback' => 'progressive_shortcodes_shortcode_container',
+    'icon' => 'fa fa-hdd-o',
+    'tips callback' => 'progressive_shortcodes_shortcode_container_tip',
+  );
+  $shortcodes['row'] = array(
+    'title' => t('Row for columns'),
+    'description' => t('Container for cols.'),
+    'process callback' => 'progressive_shortcodes_shortcode_row',
+    'process backend callback' => 'nd_visualshortcodes_backend_row',
+    'icon' => 'fa fa-th-large',
+    'child shortcode' => 'col'
+  );
+  $shortcodes['col'] = array(
+    'title' => t('Column'),
+    'description' => t('Column with size settings'),
+    'process callback' => 'progressive_shortcodes_shortcode_col',
+    'process backend callback' => 'nd_visualshortcodes_backend_col',
+    'process settings callback' => 'nd_visualshortcodes_shortcode_col_settings',
+    'icon' => 'fa fa-columns'
+  );
+  $shortcodes['message'] = array(
+    'title' => t('Notification'),
+    'description' => t('Dismissable Message.'),
+    'process callback' => 'progressive_shortcodes_shortcode_message',
+    'tips callback' => 'progressive_shortcodes_shortcode_message_tip',
+    'process settings callback' => 'progressive_shortcodes_shortcode_message_settings',
+    'icon' => 'fa fa-info-circle',
+    'description_field' => 'icon',
+  );
+  $shortcodes['button'] = array(
+    'title' => t('Button link'),
+    'description' => t('Button linked to any page or content.'),
+    'process callback' => 'progressive_shortcodes_shortcode_button',
+    'tips callback' => 'progressive_shortcodes_shortcode_button_tip',
+    'process settings callback' => 'progressive_shortcodes_shortcode_button_settings',
+    'icon' => 'fa fa-bold',
+    'description_field' => 'text',
+  );
+  $shortcodes['service_box'] = array(
+    'title' => t('Service Box'),
+    'description' => t('Service box with text.'),
+    'process callback' => 'progressive_shortcodes_shortcode_servicebox',
+    'tips callback' => 'progressive_shortcodes_shortcode_servicebox_tip',
+    'process settings callback' => 'progressive_shortcodes_shortcode_servicebox_settings',
+    'icon' => 'fa fa-star',
+    'description_field' => 'title',
+  );
+  $shortcodes['social_box'] = array(
+    'title' => t('Social Icon Box'),
+    'description' => t('Social Icon Link with text.'),
+    'process callback' => 'progressive_shortcodes_shortcode_socialbox',
+    'process settings callback' => 'progressive_shortcodes_shortcode_socialbox_settings',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'tips callback' => 'progressive_shortcodes_shortcode_socialbox_tip',
+    'icon' => 'fa fa-facebook'
+  );
+  $shortcodes['pricing_table'] = array(
+    'title' => t('Pricing Table'),
+    'description' => t('Responsive Pricing Table.'),
+    'process callback' => 'progressive_shortcodes_shortcode_pricing_table',
+    'process settings callback' => 'progressive_shortcodes_shortcode_pricing_table_settings',
+    'tips callback' => 'progressive_shortcodes_shortcode_pricing_table_tip',
+    'child shortcode'=> 'pricing_table_row',
+    'icon' => 'fa fa-usd',
+    'description_field' => 'title',
+  );
+  $shortcodes['pricing_table_row'] = array(
+    'title' => t('Pricing Table Row'),
+    'description' => t('Pricing Table Row'),
+    'process callback' => 'progressive_shortcodes_shortcode_pricing_table_row',
+    'process settings callback' => 'progressive_shortcodes_shortcode_pricing_table_row_settings',
+    'icon' => 'fa fa-money',
+    'description_field' => 'title',
+  );
+  $shortcodes['view'] = array(
+    'title' => t('View'),
+    'description' => t('Embed content - rendered View.'),
+    'process callback' => 'progressive_shortcodes_shortcode_view',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'process settings callback' => 'progressive_shortcodes_shortcode_view_settings',
+    'tips callback' => 'progressive_shortcodes_shortcode_view_tip',
+    'icon' => 'fa fa-sun-o',
+    'description_callback' => 'progressive_shortcodes_shortcode_view_description',
+  );
+  $shortcodes['block'] = array(
+    'title' => t('Block'),
+    'description' => t('Render block.'),
+    'process callback' => 'progressive_shortcodes_shortcode_block',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'process settings callback' => 'progressive_shortcodes_shortcode_block_settings',
+    'icon' => 'fa fa-file',
+    'tips callback' => 'progressive_shortcodes_shortcode_block_tip',
+    'description_callback' => 'progressive_shortcodes_shortcode_block_description',
+  );
+  $shortcodes['node'] = array(
+    'title' => t('Node'),
+    'description' => t('Render node'),
+    'process callback' => 'progressive_shortcodes_shortcode_node',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'process settings callback' => 'progressive_shortcodes_shortcode_node_settings',
+    'tips callback' => 'progressive_shortcodes_shortcode_node_tip',
+    'icon' => 'fa fa-file-o',
+    'description_callback' => 'progressive_shortcodes_shortcode_node_description',
+  );
+  $shortcodes['quicklinks'] = array(
+    'title' => t('Quick Links'),
+    'description' => t('Expandable menu links.'),
+    'process callback' => 'progressive_shortcodes_shortcode_quicklinks',
+    'process settings callback' => 'progressive_shortcodes_shortcode_quicklinks_settings',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'tips callback' => 'progressive_shortcodes_shortcode_quicklinks_tip',
+    'icon' => 'fa fa-th-list'
+  );
+  $shortcodes['video'] = array(
+    'title' => t('Video Iframe'),
+    'description' => t('Iframe adaptive video.'),
+    'process callback' => 'progressive_shortcodes_shortcode_video',
+    'process settings callback' => 'progressive_shortcodes_shortcode_video_settings',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'icon' => 'fa fa-video-camera',
+    'tips callback' => 'progressive_shortcodes_shortcode_video_tip',
+    'description_field' => 'url',
+  );
+  $shortcodes['contact'] = array(
+    'title' => t('Contact Form'),
+    'description' => t('Contact Form'),
+    'process callback' => 'progressive_shortcodes_shortcode_contact',
+    'tips callback' => 'progressive_shortcodes_shortcode_contact_tip',
+    'process settings callback' => 'progressive_shortcodes_shortcode_contact_settings',
+    'icon' => 'fa fa-envelope-o'
+  );
+  $shortcodes['slider'] = array(
+    'title' => t('Slider container'),
+    'description' => t('Slider for any content'),
+    'process callback' => 'progressive_shortcodes_shortcode_slider',
+    'process settings callback' => 'progressive_shortcodes_shortcode_slider_settings',
+    'icon' => 'fa fa-arrows-h',
+    'child shortcode' => 'slider_item',
+    'description_field' => 'type',
+  );
+  $shortcodes['slider_item'] = array(
+    'title' => t('Slider'),
+    'description' => t('Slider item'),
+    'process callback' => 'progressive_shortcodes_shortcode_slider_item',
+    'icon' => 'fa fa-long-arrow-right'
+  );
+  $shortcodes['sequence'] = array(
+    'title' => t('Sequence container'),
+    'description' => t('Sequence for any content'),
+    'process callback' => 'progressive_shortcodes_shortcode_sequence',
+    'icon' => 'fa fa-sort-numeric-asc',
+    'child shortcode' => 'sequence_item',
+  );
+  $shortcodes['sequence_item'] = array(
+    'title' => t('Sequence'),
+    'description' => t('Sequence item'),
+    'process callback' => 'progressive_shortcodes_shortcode_sequence_item',
+    'process settings callback' => 'progressive_shortcodes_shortcode_sequence_item_settings',
+    'icon' => 'fa fa-long-arrow-down',
+    'description_field' => 'type',
+  );
+  $shortcodes['accordions'] = array(
+    'title' => t('Accordion container'),
+    'description' => t('Animated Accordions wrapper.'),
+    'process callback' => 'progressive_shortcodes_shortcode_accordions',
+    'process settings callback' => 'progressive_shortcodes_shortcode_accordions_settings',
+    'tips callback' => 'progressive_shortcodes_shortcode_accordions_tip',
+    'child shortcode' => 'accordion',
+    'icon' => 'fa fa-bars'
+  );
+  $shortcodes['accordion'] = array(
+    'title' => t('Accordion item'),
+    'description' => t('Accordion item.'),
+    'process callback' => 'progressive_shortcodes_shortcode_accordion',
+    'process settings callback' => 'progressive_shortcodes_shortcode_accordion_settings',
+    'icon' => 'fa fa-minus',
+    'description_field' => 'title',
+  );
+  $shortcodes['image'] = array(
+    'title' => t('Image with caption'),
+    'description' => t('Image with caption'),
+    'process callback' => 'progressive_shortcodes_shortcode_image',
+    'process settings callback' => 'progressive_shortcodes_shortcode_image_settings',
+    'tips callback' => 'progressive_shortcodes_shortcode_image_tip',
+    'icon' => 'fa fa-file-image-o'
+  );
+  $shortcodes['gmap'] = array(
+    'title' => t('Google Map'),
+    'description' => t('Google Map'),
+    'process callback' => 'progressive_shortcodes_shortcode_gmap',
+    'process settings callback' => 'progressive_shortcodes_shortcode_gmap_settings',
+    'tips callback' => 'progressive_shortcodes_shortcode_gmap_tip',
+    'icon' => 'fa fa-map-marker'
+  );
+  $shortcodes['tabs'] = array(
+    'title' => t('Tabs container'),
+    'description' => t('jQuery Tabs.'),
+    'process callback' => 'progressive_shortcodes_shortcode_tabs',
+    'process settings callback' => 'progressive_shortcodes_shortcode_tabs_settings',
+    'tips callback' => 'progressive_shortcodes_shortcode_tabs_tip',
+    'icon' => 'fa fa-folder-open',
+    'child shortcode' => 'tab',
+    'description_field' => 'type',
+  );
+  $shortcodes['tab'] = array(
+    'title' => t('Tab'),
+    'description' => t('Tab content.'),
+    'process callback' => 'progressive_shortcodes_shortcode_tab',
+    'process settings callback' => 'progressive_shortcodes_shortcode_tab_settings',
+    'icon' => 'fa fa-folder',
+    'description_field' => 'title',
+  );
+  $shortcodes['hr'] = array(
+    'title' => t('Horizontal Rules'),
+    'description' => t('Horizontal Line with spaces.'),
+    'process callback' => 'progressive_shortcodes_shortcode_hr',
+    'process settings callback' => 'progressive_shortcodes_shortcode_hr_settings',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'tips callback' => 'progressive_shortcodes_shortcode_hr_tip',
+    'icon' => 'fa fa-ellipsis-h',
+    'description_field' => 'type',
+  );
+  $shortcodes['title'] = array(
+    'title' => t('Title'),
+    'description' => t('Title with optional underline.'),
+    'process callback' => 'progressive_shortcodes_shortcode_title',
+    'tips callback' => 'progressive_shortcodes_shortcode_title_tip',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'process settings callback' => 'progressive_shortcodes_shortcode_title_settings',
+    'icon' => 'fa fa-text-width',
+    'description_field' => 'title',
+  );
+  $shortcodes['sitemap'] = array(
+    'title' => t('Sitemap'),
+    'description' => t('Website Sitemap'),
+    'process callback' => 'progressive_shortcodes_shortcode_sitemap',
+    'tips callback' => 'progressive_shortcodes_shortcode_sitemap_tip',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'icon' => 'fa fa-sitemap',
+    'description_field' => 'machine_name',
+  );
+  $shortcodes['html'] = array(
+    'title' => t('HTML'),
+    'description' => t('HTML code'),
+    'process callback' => 'progressive_shortcodes_shortcode_html',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'process settings callback' => 'nd_visualshortcodes_shortcode_html_settings',
+    'icon' => 'fa fa-code',
+    'description_field' => 'text',
+  );
+  $shortcodes['chart'] = array(
+    'title' => t('Chart'),
+    'description' => t('Chart'),
+    'process callback' => 'progressive_shortcodes_shortcode_chart',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'process settings callback' => 'progressive_shortcodes_shortcode_chart_settings',
+    'icon' => 'fa fa-bar-chart-o',
+    'description_field' => 'type',
+  );
+  $shortcodes['styledcontainer'] = array(
+    'title' => t('Frame Container'),
+    'description' => t('Styled Container'),
+    'process callback' => 'progressive_shortcodes_shortcode_styledcontainer',
+    'process settings callback' => 'progressive_shortcodes_shortcode_styledcontainer_settings',
+    'icon' => 'fa fa-strikethrough',
+    'description_field' => 'type',
+  );
+  $shortcodes['icon'] = array(
+    'title' => t('Icon'),
+    'description' => t('FontAwesome or LivIcon'),
+    'process callback' => 'progressive_shortcodes_shortcode_icon',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'process settings callback' => 'progressive_shortcodes_shortcode_icon_settings',
+    'icon' => 'fa fa-rocket'
+  );
+  $shortcodes['textrotation'] = array(
+    'title' => t('Text Rotation'),
+    'description' => t('FontAwesome or LivIcon'),
+    'process callback' => 'progressive_shortcodes_shortcode_textrotation',
+    'process backend callback' => 'nd_visualshortcodes_backend_nochilds',
+    'process settings callback' => 'progressive_shortcodes_shortcode_textrotation_settings',
+    'icon' => 'fa fa-rotate-right',
+    'description_field' => 'title',
+  );
+
+  return $shortcodes;
+}
+
+function _progressive_shortcodes_shortcode_attributes($attrs) {
+  if(empty($attrs)) {
+    return '';
+  }
+  $allowed_attributes = array('class' => 'class', 'extra_classes' => 'class', 'href' => 'href', 'id' => 'id', 'animation' => 'data-appear-animation', 'animation_delay' => 'data-appear-animation-delay', 'style' => 'style', 'extra_style' => 'style', 'target' => 'target');
+  if (isset($attrs['link']) && $attrs['link'] == $_GET['q']) {
+    $attrs['class'] = (isset($attrs['class']) ? $attrs['class'] : '') . ' active'; 
+  }
+  $output = '';
+  $attrs_array = array();
+  foreach($attrs as $name => $value) {
+    $value = trim($value);
+    if(strpos($name, 'style_') === 0) {
+      $value_style = str_replace(array('style_', '_'), array('', '-'), $name);
+      if(strpos($value_style, 'border-radius') !== FALSE) {
+        $value = strpos($value, '%') !== FALSE ? $value : (int)$value . 'px;';
+        $value = '-webkit-' . $value_style. ': ' . $value . '; -moz-' . $value_style. ': ' . $value . '; ' . $value_style. ': ' . $value . ';';
+      }
+      elseif(strpos($name, 'margin') !== FALSE || strpos($name, 'padding') !== FALSE || strpos($name, 'width') !== FALSE || strpos($name, 'height') !== FALSE) {
+        $value = strpos($value, '%') !== FALSE ? $value : (int)$value . 'px;';
+        $value =  $value_style . ': ' . $value;
+      }
+      elseif(strpos($name, 'color') !== FALSE) {
+        $value =  $value_style . ': #' . trim($value, '#') . ';';
+      }
+      elseif(strpos($value_style, 'image') !== FALSE) {
+        $file = file_load($value);
+        $filename = isset($file->uri) ? file_create_url($file->uri) : '';
+        $value =  $value_style . ': url("' . $filename . '");';
+      }
+      else {
+        $value = $value_style . ': ' . $value . ';';
+      }
+      $name = 'style';
+    }
+    if(isset($allowed_attributes[$name])) {
+      $name = $allowed_attributes[$name];
+      if ($value !== '') {
+        $attrs_array[$name] = (isset($attrs_array[$name]) ? $attrs_array[$name] . ' ' : '') . $value;
+      }
+    }
+    elseif(strpos($name, 'data-') === 0) {
+      if ($value !== '') {
+        $attrs_array[$name] = (isset($attrs_array[$name]) ? $attrs_array[$name] . ' ' : '') . $value;
+      }
+    }
+  }
+  if(isset($attrs['style_background_color']) && strtolower(trim($attrs['style_background_color'], '#')) == '000000') {
+    $attrs_array['class'] = (isset($attrs_array['class']) ? $attrs_array['class'] : '') . ' text-white';
+  }
+  if(isset($attrs['style_background_color']) && strtolower(trim($attrs['style_background_color'], '#')) == 'ffffff') {
+    $attrs_array['class'] = (isset($attrs_array['class']) ? $attrs_array['class'] : '') . ' text-black';
+  }
+  if(isset($attrs['text_align']) && $attrs['text_align']) {
+    $attrs_array['style'] = (isset($attrs_array['style']) ? $attrs_array['style'] : '') . ' text-align:'. $attrs['text_align'] . ';';
+  }
+
+  foreach($attrs_array as $name => $value) {
+    $output .= " $name = '$value'";
+  }
+  return $output;
+}
+
+function progressive_shortcodes_shortcode_spacer($attrs, $text) {
+  $attrs['class'] = 'spacer ' . (isset($attrs['class']) ? $attrs['class'] : '');
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '></div>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_spacer_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Spacer:</strong><br/>[spacer][/spacer]</br>';
+  $output[] = '<strong>Available classes:</strong> <strong>xs</strong> - 10px <strong>sm</strong> - 20px <strong>md</strong> - 40px <strong>lg</strong> - 60px <strong>xlg</strong> - 80px</p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_spacer_settings($attrs, $text) {
+  $form['style_height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height'),
+    '#default_value' => isset($attrs['style_height']) ? $attrs['style_height'] : '',
+    '#attributes' => array('class' => array('form-control')),
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_progress($attrs, $text) {
+  $attrs['class'] = isset($attrs['class']) ? $attrs['class'] : '';
+  $attrs['class'] .= isset($attrs['animated']) && $attrs['animated']? ' active' : '';
+  $attrs['class'] .= isset($attrs['striped']) && $attrs['striped']? ' progress-striped' : '';
+  $attrs['class'] .= isset($attrs['hover']) && $attrs['hover']? ' hover' : '';
+
+  $colors = array('blue' => 'info', 'green' => 'success', 'orange' => 'warning', 'red' => 'danger', 'black' => '');
+  $color = (isset($attrs['color']) && isset($colors[$attrs['color']])) ? $attrs['color'] : '';
+  $text = isset($attrs['title']) && $attrs['title'] ? $attrs['title'] : $text;
+  if(isset($attrs['type']) && $attrs['type'] == 'circle') {
+    $attrs['class'] .= ' progress-circular';
+    $line_color = isset($attrs['custom_color']) && $attrs['custom_color'] ? '#' . trim($attrs['custom_color'], '#') : '#f2f2f2';
+    $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>
+       <input type="text" class="knob" value="0" rel="' . $attrs['percent'] . '" data-linecap="round" data-width="200" data-bgColor="#f2f2f2" data-fgColor="' . $line_color . '" data-thickness=.15 data-readOnly=true disabled>
+      </div>';
+  }
+  else {
+    $attrs['class'] .= ' progress';
+    $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . ' data-appear-progress-animation="' . $attrs['percent'] .'%">
+      <div class="progress-bar progress-bar-' . $colors[$color] . '">' . $text . ' <span class = "progress-percent">' . $attrs['percent'] .'%</span></div>
+    </div>';
+  }
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_progress_settings($attrs, $text) {
+  $attrs['title'] = isset($attrs['title']) && $attrs['title'] ? $attrs['title'] : $text;
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => isset($attrs['title']) ? $attrs['title'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-7">',
+    '#states' => array(
+      'invisible' => array(
+        '.progess-type-select' => array('value' => 'circle'),
+      ),
+    ),
+  );
+  $colors = array('blue' => t('Blue'), 'green' => t('Green'), 'orange' => t('Orange'), 'red' => t('Red'), 'black' => t('Black'));
+  $form['color'] = array(
+    '#type' => 'radios',
+    '#title' => t('Color'),
+    '#options' => $colors,
+    '#default_value' => isset($attrs['color']) ? $attrs['color'] : 'blue',
+    '#attributes' => array('class' => array('color-radios')),
+    '#prefix' => '</div><div class = "col-sm-3">',
+    '#states' => array(
+      'visible' => array(
+        '.progess-type-select' => array('value' => 'line'),
+      ),
+    ),
+  );
+  $form['percent'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Percent'),
+    '#default_value' => isset($attrs['percent']) ? $attrs['percent'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-2">',
+    '#suffix' => '</div></div>',
+  );
+  $types = array('line' => t('Line'), 'circle' => t('Circle'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Type'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : 'line',
+    '#attributes' => array('class' => array('form-control progess-type-select')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-3">',
+  );
+  $form['striped'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Striped'),
+    '#default_value' => isset($attrs['striped']) ? $attrs['striped'] : '',
+    '#prefix' => '</div><div class = "col-sm-3">',
+    '#states' => array(
+      'visible' => array(
+        '.progess-type-select' => array('value' => 'line'),
+      ),
+    ),
+  );
+  $form['animated'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Animated'),
+    '#default_value' => isset($attrs['animated']) ? $attrs['animated'] : '',
+    '#prefix' => '</div><div class = "col-sm-3">',
+    '#states' => array(
+      'visible' => array(
+        '.progess-type-select' => array('value' => 'line'),
+      ),
+    ),
+  );
+  $form['hover'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hover Animation'),
+    '#default_value' => isset($attrs['hover']) ? $attrs['hover'] : '',
+    '#prefix' => '</div><div class = "col-sm-3">',
+    '#states' => array(
+      'visible' => array(
+        '.progess-type-select' => array('value' => 'line'),
+      ),
+    ),
+  );
+  $form['custom_color'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Color'),
+    '#default_value' => isset($attrs['custom_color']) ? $attrs['custom_color'] : '',
+    '#states' => array(
+      'invisible' => array(
+        '.progess-type-select' => array('value' => 'line'),
+      ),
+    ),
+    '#attributes' => array('class' => array('form-control colorpicker-enable')),
+    '#prefix' => '</div><div class = "col-sm-3">',
+    '#suffix' => '</div></div>',
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_progress_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Progress bar:</strong><br/>[progress percent = "90" color = "blue"]Design[/progress]</br>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_video($attrs, $text) {
+  $attrs['class'] = isset($attrs['class']) ? ' ' . $attrs['class'] : '';
+  $attrs['url'] = isset($attrs['url']) && $attrs['url'] ? $attrs['url'] : $text;
+  $iframe_attrs = (isset($attrs['width']) ? 'width="' . $attrs['width'] .'"' : '') . (isset($attrs['height']) ? ' height ="' . $attrs['height'] . '"' : '');
+  if(!$iframe_attrs) {
+    $attrs['class'] .= ' video-box';
+  }
+  if(strpos($attrs['url'], 'vimeo') !== FALSE) {
+    $attrs['class'] .= ' vimeo';
+    preg_match('|/(\d+)|', $attrs['url'], $matches);
+    $video_url = '//player.vimeo.com/video/' . $matches[1] . '';
+  }
+  elseif(strpos($attrs['url'], 'youtube') !== FALSE) {
+    $attrs['class'] .= ' youtube';
+    $id = substr($attrs['url'], strpos($attrs['url'], '?v=') + 3);
+    $video_url = '//www.youtube.com/embed/' . $id .'?showinfo=0&amp;wmode=opaque';
+  }
+  $text = '<div  ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>
+    <iframe src="' . $video_url . '" ' . $iframe_attrs . '  frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen=""></iframe>
+  </div>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_video_settings($attrs, $text) {
+  $attrs['url'] = isset($attrs['url']) && $attrs['url'] ? $attrs['url'] : $text;
+  $form['url'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Video Url'),
+    '#default_value' => isset($attrs['url']) ? $attrs['url'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#description' => t('Supports: YouTube and Vimeo')
+  );
+  $form['width'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Width'),
+    '#default_value' => isset($attrs['width']) ? $attrs['width'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['height'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Height'),
+    '#default_value' => isset($attrs['height']) ? $attrs['height'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_video_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Video iFrame:</strong><br/>[video]player.vimeo.com/video/7449107[/video]</br>';
+  $output[] = '<strong>Text</strong> - Embed URL of the video.</p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_contact($attrs, $text) {
+  $text = '';
+  if (user_access('access site-wide contact form') && module_exists('contact')) {
+    if (!flood_is_allowed('contact', variable_get('contact_hourly_threshold', 3))) {
+      $text = t("You cannot send more than %number messages per hour. Please try again later.", array('%number' => variable_get('contact_hourly_threshold', 3)));
+    }
+    else {
+      module_load_include('inc', 'contact', 'contact.pages');
+      $content = drupal_get_form('contact_site_form');
+      // Allow users to alter contact form fields
+      $alter_fields = array('name', 'mail', 'subject', 'message');
+      foreach($alter_fields as $field) {
+        if(isset($attrs[$field])) {
+          $content[$field]['#title'] = t($attrs[$field]);
+          $content[$field]['#attributes']['placeholder'] = t($attrs[$field]);
+        }
+      }
+      $title = isset($attrs['title']) ? '<h3 class="title">' . $attrs['title'] . '</h3>' : '';
+      $content['name']['#prefix'] = $title;
+      $text = '<div class = "login-register"><div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>' . drupal_render($content) . '</div></div>';
+    }
+  }
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_contact_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Contact Form:</strong><br/>[contact name = "Name field Title"][/contact]</br>';
+  $output[] = 'Override default title for fields: <strong>name</strong>, <strong>subject</strong>, <strong>mail</strong>, <strong>message</strong></p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_contact_settings($attrs, $text) {
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Main Title'),
+    '#default_value' => isset($attrs['title']) ? $attrs['title'] : '',
+    '#attributes' => array('class' => array('form-control')),
+  );
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#default_value' => isset($attrs['name']) ? $attrs['name'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => t('Override fields titles:') . '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['mail'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email'),
+    '#default_value' => isset($attrs['mail']) ? $attrs['mail'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>'
+  );
+  $form['subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#default_value' => isset($attrs['subject']) ? $attrs['subject'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['message'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Message'),
+    '#default_value' => isset($attrs['message']) ? $attrs['message'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>'
+  );
+
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_slider($attrs, $text) {
+  $attrs['class'] = 'respond-carousel carousel-box overflow load ' . (isset($attrs['class']) ? $attrs['class'] : '');
+  $pagination = '';
+  if(in_array($attrs['type'], array('pagination', 'navigation')) && 0) {
+    $pagination = '<div class = "carousel-pagination carousel-box">
+      <a class="next" href="#">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="9px" height="16px" viewBox="0 0 9 16" enable-background="new 0 0 9 16" xml:space="preserve">
+          <polygon fill-rule="evenodd" clip-rule="evenodd" fill="#fcfcfc" points="1,0.001 0,1.001 7,8 0,14.999 1,15.999 9,8 "></polygon>
+        </svg>
+      </a>
+      <a class="prev" href="#">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="9px" height="16px" viewBox="0 0 9 16" enable-background="new 0 0 9 16" xml:space="preserve">
+          <polygon fill-rule="evenodd" clip-rule="evenodd" fill="#fcfcfc" points="8,15.999 9,14.999 2,8 9,1.001 8,0.001 0,8 "></polygon>
+        </svg>
+      </a>
+    </div>';
+  }
+  $pagination_switches = '';
+  switch($attrs['type']) {
+    case 'autoscroll':
+      $attrs['data-carousel-autoplay'] = 'true';
+      $attrs['data-carousel-nav'] = 'false';
+      $attrs['data-carousel-one'] = 'true';
+      $attrs['data-duration'] = isset($attrs['duration']) ? $attrs['duration'] : 1000;
+      break;
+    case 'pagination':
+      $attrs['data-carousel-pagination'] = 'true';
+      $attrs['data-carousel-nav'] = 'false';
+      $attrs['data-carousel-one'] = 'true';
+      $pagination_switches = '<div class="clearfix"></div><div class="pagination switches"></div>';
+      break;
+    case 'navigation':
+      $attrs['style_margin_top'] = isset($attrs['style_margin_top']) ? $attrs['style_margin_top'] : '-40px';
+      $attrs['data-carousel-one'] = 'true';
+      $attrs['class'] .= ' allow-overflow';
+      $pagination = '<div class = "carousel-pagination carousel-box">
+        <a class="next" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="9px" height="16px" viewBox="0 0 9 16" enable-background="new 0 0 9 16" xml:space="preserve">
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="#fcfcfc" points="1,0.001 0,1.001 7,8 0,14.999 1,15.999 9,8 "></polygon>
+          </svg>
+        </a>
+        <a class="prev" href="#">
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="9px" height="16px" viewBox="0 0 9 16" enable-background="new 0 0 9 16" xml:space="preserve">
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="#fcfcfc" points="8,15.999 9,14.999 2,8 9,1.001 8,0.001 0,8 "></polygon>
+          </svg>
+        </a>
+      </div>';
+      break;
+  }
+  return '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>' . $pagination . '
+  <div class = "row">
+    <div class="carousel">
+      ' . $text . '
+    </div>
+  </div>
+  <div class="clearfix"></div>
+    ' . $pagination_switches . '
+  </div>';
+}
+
+function progressive_shortcodes_shortcode_slider_settings($attrs, $text) {
+  $types = array('autoscroll' => t('Autoscroll'), 'pagination' => t('Pagination'), 'navigation' => t('Navigation'), 'pagination_navigation' =>t('Pagination & Navigation'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#options' => $types,
+    '#title' => t('Type'),
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : 'autoscroll',
+    '#attributes' => array('class' => array('form-control slider-type-selector')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['duration'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Auto Scroll Duration (ms)'),
+    '#default_value' => isset($attrs['duration']) ? $attrs['duration'] : '1000',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+    '#states' => array(
+      'visible' => array(
+        '.slider-type-selector' => array('value' => 'autoscroll'),
+      ),
+    ),
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_slider_item($attrs, $text) {
+  $attrs['class'] = 'col-sm-12 col-md-12' . (isset($attrs['class']) ? $attrs['class'] : '');;
+  return '<div><div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>' . $text . '</div><div class="clearfix"></div></div>';
+}
+
+
+function progressive_shortcodes_shortcode_sequence($attrs, $text) {
+  $attrs['class'] = 'steps ' . (isset($attrs['class']) ? $attrs['class'] : '');
+  return '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>
+    ' . $text . '
+  </div>';
+}
+
+function progressive_shortcodes_shortcode_sequence_item($attrs, $text, $parent_attrs) {
+  $attrs['class'] = 'step ' . (isset($attrs['class']) ? $attrs['class'] : '');
+  $attrs['class'] .= 'border-' . $attrs['color'];
+  $attrs['class'] .= in_array($attrs['type'], array('background', 'image_background')) ? ' white bg-' . $attrs['color'] : '';
+  $bg_img = '';
+  if($attrs['type'] == 'image_background' && isset($attrs['image_fid']) && $attrs['image_fid']) {
+    $inner_attrs = array(
+      'class' => 'bg-image',
+      'style_background_image' => $attrs['image_fid']
+    );
+    $bg_img = '<div ' . _progressive_shortcodes_shortcode_attributes($inner_attrs)  . '></div>';
+  }
+  return '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>' . $bg_img . '<div class = "step-wrapper">' . $text . '</div></div>';
+}
+
+function progressive_shortcodes_shortcode_sequence_item_settings($attrs, $text) {
+  $colors = array('warning' => t('Orange'), 'error' => t('Red'), 'success' => t('Green'), 'info' => t('Blue'), 'grey' => t('Grey'));
+  $form['color'] = array(
+    '#type' => 'radios',
+    '#title' => t('Color'),
+    '#options' => $colors,
+    '#default_value' => isset($attrs['color']) ? $attrs['color'] : 'warning',
+    '#attributes' => array('class' => array('color-radios')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+  );
+  $types = array('background' => t('Background'), 'border' => t('Border'), 'image_background' => t('Image Background'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#options' => $types,
+    '#title' => t('Type'),
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : 'background',
+    '#attributes' => array('class' => array('form-control type-sequence-select')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  $filename = isset($attrs['image_fid']) && !empty($attrs['image_fid']) ? file_load($attrs['image_fid'])->uri : '';
+  $image = $filename ? theme('image_style', array('style_name' => 'media_thumbnail', 'path' => $filename)) : '';
+  $form['image_fid'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image'),
+    '#default_value' => isset($attrs['image_fid']) ? $attrs['image_fid'] : '',
+    '#states' => array(
+      'visible' => array(
+        '.type-sequence-select' => array('value' => 'image_background'),
+      ),
+    ),
+    '#attributes' => array('class' => array('image-media-upload hidden')),
+    '#field_suffix' => '<div class = "preview-image">' . $image . '</div><a href = "#" class = "media-upload button">' . t('Upload Image') .'</a><a href = "#" class = "media-remove button">' . t('Remove Image') .'</a>',
+  );
+ 
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_quote($attrs, $text) {
+  if(isset($attrs['blockquote']) && $attrs['blockquote']) {
+    $output = '<blockquote ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>
+      <p>' . $text . ' </p>
+      ' . ($attrs['author'] ? '<small>' . $attrs['author'] . '</small>' : '') . '
+    </blockquote>';
+  }
+  else {
+    $attrs['class'] = (isset($attrs['class']) ? $attrs['class'] : '') . ' quote centered';
+    if(isset($attrs['image']) && $attrs['image']) {
+      $img = $attrs['image'];
+    }
+    elseif(isset($attrs['image_fid']) && $attrs['image_fid']) {
+      $file = file_load($attrs['image_fid']);
+      $img = isset($file->uri) ? $file->uri : '';
+    }
+    $h = isset($img) ? '4' : '2';
+    $img = isset($img) ? theme('image', array('path' => $img)) : '';
+    $output = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>
+      ' . $img . '
+      <h' . $h . '><i class="fa fa-quote-left highlight"></i> ' . $text . ' <i class="fa fa-quote-right highlight"></i></h' . $h . '>
+      <p class="label label-primary">' . $attrs['author'] . '</p>
+    </div>';
+  }
+  return $output;
+}
+
+function progressive_shortcodes_shortcode_quote_tip($format, $long) {
+  $output = array();
+  $output[] = '<p>All elements supports <strong>class</strong>, <strong>animation</strong> and <strong>delay</strong> attributes. Supports all <a href = "http://daneden.github.io/animate.css/">animation.css</a> values. Delay value in ms. ';
+  $output[] = '<p><strong>Quote:</strong><br/>[quote author = "Author Name" image = "/files/author.png" blockquote]text[/quote]</br>';
+  $output[] = '<strong>blockquote</strong> - Simple left aligned quote with author name, <strong>image</strong> - URL to the image.</p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_quote_settings($attrs, $text) {
+  $form['blockquote'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Blockquote'),
+    '#default_value' => isset($attrs['blockquote']) ? $attrs['blockquote'] : 0,
+    '#attributes' => array('class' => array('blockquote-shortcode-flag'))
+  );
+  $form['author'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Author'),
+    '#default_value' => isset($attrs['author']) ? $attrs['author'] : '',
+    '#attributes' => array('class' => array('form-control')),
+  );
+  $file = isset($attrs['image_fid']) && !empty($attrs['image_fid']) ? file_load($attrs['image_fid']) : '';
+  $filename = isset($file->uri) ? $file->uri : (isset($attrs['image']) ? $attrs['image'] : '');
+  $image = $filename ? theme('image_style', array('style_name' => 'media_thumbnail', 'path' => $filename)) : '';
+  $form['image_fid'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image'),
+    '#default_value' => isset($attrs['image_fid']) ? $attrs['image_fid'] : '',
+    '#states' => array(
+      'visible' => array(
+        '.blockquote-shortcode-flag' => array('checked' => FALSE),
+      ),
+    ),
+    '#attributes' => array('class' => array('image-media-upload hidden')),
+    '#field_suffix' => '<div class = "preview-image">' . $image . '</div><a href = "#" class = "media-upload button">' . t('Upload Image') .'</a><a href = "#" class = "media-remove button">' . t('Remove Image') .'</a>'
+  );
+  // Added only to save the old image attribute
+  if(isset($attrs['image']) && !isset($attrs['image_fid']) && !$attrs['image_fid']) {
+    $form['image'] = array(
+      '#type' => 'textfield',
+      '#default_value' => $attrs['image'],
+      '#attributes' => array('class' => array('hidden fid-old-field'))
+    );
+  }
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_testimonial($attrs, $text) {
+  $attrs['class'] = 'respond ' . (isset($attrs['type']) ? $attrs['type'] : '');
+  $class = 'description ' . $attrs['type'] . (isset($attrs['color']) && $attrs['color'] != 'default-testimonial'? '-' . $attrs['color'] : '');
+  $file = isset($attrs['image_fid']) && !empty($attrs['image_fid']) ? file_load($attrs['image_fid']) : '';
+  $img = isset($file->uri) ? $file->uri : '';
+  $img = $img ? theme('image', array('path' => $img, 'attributes' => array('class' => array('img-circle')))) : '';
+  $output = '<div class = "' . $class . '">' . $text . '</div>
+  <div class = "name"><div class = "icon">' .
+  ($img ? $img : '<i class="fa fa-user"></i>') . '</div>' . 
+  (isset($attrs['author']) && $attrs['author'] ? '<strong>' . $attrs['author'] . '</strong>' : '') . 
+  (isset($attrs['author_info']) && $attrs['author_info'] ? '<a href = "#" class = "no-border">' . $attrs['author_info'] . '</a>' : '') . '
+  </div>';
+
+  return '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>' . $output . '</div>';
+}
+
+function progressive_shortcodes_shortcode_testimonial_settings($attrs, $text) {
+  $types = array('border' => t('Border color'), 'bg' => t('Background color'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#options' => $types,
+    '#title' => t('Type'),
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : 'border-',
+    '#attributes' => array('class' => array('form-control blockquote-shortcode-flag')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $colors = array('default-testimonial' => t('Default'), 'primary' => t('Dark Blue'), 'warning' => t('Orange'), 'error' => t('Red'), 'success' => t('Green'), 'info' => t('Blue'));
+  $form['color'] = array(
+    '#type' => 'radios',
+    '#title' => t('Color'),
+    '#options' => $colors,
+    '#default_value' => isset($attrs['color']) ? $attrs['color'] : '',
+    '#attributes' => array('class' => array('color-radios form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>'
+  );
+
+  $form['author'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Author'),
+    '#default_value' => isset($attrs['author']) ? $attrs['author'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['author_info'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Author info'),
+    '#default_value' => isset($attrs['author_info']) ? $attrs['author_info'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>'
+  );
+
+  $filename = isset($attrs['image_fid']) && !empty($attrs['image_fid']) ? file_load($attrs['image_fid'])->uri : (isset($attrs['image']) ? $attrs['image'] : '');
+  $image = $filename ? theme('image_style', array('style_name' => 'media_thumbnail', 'path' => $filename)) : '';
+  $form['image_fid'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image'),
+    '#default_value' => isset($attrs['image_fid']) ? $attrs['image_fid'] : '',
+    '#states' => array(
+      'visible' => array(
+        '.blockquote-shortcode-flag' => array('checked' => FALSE),
+      ),
+    ),
+    '#attributes' => array('class' => array('image-media-upload hidden')),
+    '#field_suffix' => '<div class = "preview-image">' . $image . '</div><a href = "#" class = "media-upload button">' . t('Upload Image') .'</a><a href = "#" class = "media-remove button">' . t('Remove Image') .'</a>'
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_servicebox($attrs, $text) {
+  $attrs['link'] = isset($attrs['link']) ? (strpos($attrs['link'], '#') === FALSE ? url($attrs['link']) : $attrs['link']) : '';
+  $attrs['type'] = isset($attrs['type']) ? $attrs['type'] : 'center_big';
+  $attrs['inner_animation'] = isset($attrs['inner_animation']) ? ' data-appear-animation="' . $attrs['inner_animation'] . '"' : '';
+  $attrs['inner_icon_animation'] = $attrs['inner_animation'] ? 'data-appear-animation="wobble"' : '';
+  $attrs['link_text'] = isset($attrs['link_text']) ? $attrs['link_text'] : t('Read More');
+  switch($attrs['type']) {
+    case 'left_small':
+      $attrs['class'] = 'text-small features-block' . (isset($attrs['class']) ? ' ' . $attrs['class'] : '');
+      $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>
+        <a class = "header-box" href = "' . $attrs['link'] . '">
+        ' . (isset($attrs['icon']) ? '<div class="icon-box" ' . $attrs['inner_icon_animation'] .'><i class="' . $attrs['icon'] . '"></i></div>' : '') . '
+        ' . (isset($attrs['title']) ? '<h6 ' . $attrs['inner_animation'] . '>' . $attrs['title'] . '</h6>' : '') . '        
+        </a>
+        <div ' . $attrs['inner_animation'] . '>
+          ' . $text . '
+        </div>
+      </div>';
+      break;
+    case 'left_medium':
+      $attrs['class'] = 'service' . (isset($attrs['class']) ? ' ' . $attrs['class'] : '');
+      $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>
+        <a href = "' . $attrs['link'] . '">' .
+          (isset($attrs['icon']) ? '<div class="icon bg" ' . $attrs['inner_icon_animation'] .'><i class="' . $attrs['icon'] . '"></i></div>' : '') .
+          (isset($attrs['title']) ? '<h6 class = "title" ' . $attrs['inner_animation'] . '>' . $attrs['title'] . '</h6>' : '') . '        
+          <div class = "text-small" ' . $attrs['inner_animation'] . '>' .
+          $text . '
+          </div>
+        </a>
+      </div>';
+      break;
+    case 'left_big':
+      $attrs['class'] = (isset($attrs['class']) ? $attrs['class'] : '');
+      $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>' .
+        (isset($attrs['icon']) ? '<a href = "' . $attrs['link'] . '" class="big-icon bg pull-left" ' . $attrs['inner_icon_animation'] .'><i class="' . $attrs['icon'] . '"></i></a>' : '') .
+        (isset($attrs['title']) ? '<h3 ' . $attrs['inner_animation'] . '>' . $attrs['title'] . '</h3>' : '') . '
+        <p ' . $attrs['inner_animation'] . '>
+          ' . $text . '
+        </p>
+      </div>';
+      break;
+    case 'center_big':
+    default:
+      $attrs['class'] = 'big-services-box' . (isset($attrs['class']) ? ' ' . $attrs['class'] : '');
+      $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>
+        ' . (isset($attrs['icon']) ? '<div class="big-icon bg" ' . $attrs['inner_icon_animation'] .'><i class="' . $attrs['icon'] . '"></i></div>' : '') . '
+        ' . (isset($attrs['title']) ? '<h4 class="title" ' . $attrs['inner_animation'] . '>' . $attrs['title'] . '</h4>' : '') . '
+        <div class="text-small" ' . $attrs['inner_animation'] . '>
+          ' . $text . '
+          <div class="clearfix"></div><br>
+          ' . ($attrs['link'] ? '<a class="btn btn-default" href = "' . $attrs['link'] . '">' . $attrs['link_text'] . '</a>' : '') . '
+        </div>
+      </div>';
+      break;
+  }
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_servicebox_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Icon Box:</strong><br/>[service_box icon = "fa fa-user" link_text = "More" title = "Title" link = "contact"]Text[/service_box]</br>';
+  $output[] = 'Available attributes: <strong>icon</strong> - Icon font class, <strong>link</strong>, <strong>link_text</strong>, <strong>title</strong></p>';
+  return implode(' ', $output);
+}
+
+
+function progressive_shortcodes_shortcode_servicebox_settings($attrs, $text) {
+  $form['title'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Title'),
+    '#default_value' => isset($attrs['title']) ? $attrs['title'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['link'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Link'),
+    '#default_value' => isset($attrs['link']) ? $attrs['link'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>'
+  );
+  $types = array('left_small' => t('Left Small'), 'left_medium' => t('Left Medium'), 'left_big' => t('Left Big'), 'center_big' => t('Center Big'));
+  $form['type'] = array(
+    '#title' => t('Icon Type'),
+    '#type' => 'select',
+    '#options' => $types,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : 'center_big',
+    '#attributes' => array('class' => array('form-control type-icon-select')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-2">',
+  );
+  $form['icon'] = array(
+    '#title' => t('Icon'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'admin/ajax/nd_visualshortcodes/icons_autocomplete/all',
+    '#default_value' => isset($attrs['icon']) ? $attrs['icon'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-4">',
+  );
+  $form['link_text'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Read More text'),
+    '#default_value' => isset($attrs['link_text']) ? $attrs['link_text'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#states' => array(
+      'visible' => array(
+        '.type-icon-select' => array('value' => 'center_big'),
+      ),
+    ),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>'
+  );
+  $form['inner_animation'] = array(
+    '#type' => 'select',
+    '#title' => t('Content Animation'),
+    '#options' => _nd_visualshortcodes_list_animations(),
+    '#default_value' => isset($attrs['inner_animation']) ? $attrs['inner_animation'] : '',
+    '#prefix' => '<div class = "row"><div class = "col-xs-6 centered">',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['inner_icon_animation'] = array(
+    '#type' => 'select',
+    '#title' => t('Icon Animation'),
+    '#options' => _nd_visualshortcodes_list_animations(),
+    '#default_value' => isset($attrs['inner_icon_animation']) ? $attrs['inner_icon_animation'] : '',
+    '#prefix' => '</div><div class = "col-xs-6 centered">',
+    '#suffix' => '</div></div>',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_socialbox($attrs, $text) {
+  $attrs['class'] = (isset($attrs['class']) ? $attrs['class'] : '') . 'sbtnf sbtnf-rounded color color-hover ' . $attrs['icon'];
+  $link = strpos($attrs['link'], '#') === FALSE ? url($attrs['link']) : $attrs['link'];
+  $text = '<span class = "social"><a target="_blank" href="' . $link . '" ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '></a></span>';
+
+/*  $attrs['class'] = (isset($attrs['class']) ? $attrs['class'] : '') . 'icon rounded ' . $attrs['icon'];
+  $icon = str_replace('icon-', 'fa-', $attrs['icon']);
+  $link = strpos($attrs['link'], '#') === FALSE ? url($attrs['link']) : $attrs['link'];
+  $text = '<span class = "social"><a target="_blank" href="' . $link . '" ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '><i class="fa ' . $icon . '"></i></a></span>'; */
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_socialbox_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Social Icon Box:</strong><br/>[social_box icon = "icon-facebook" link = "http://facebook.com"][/social_box]</br>';
+  $output[] = 'Available icons: <a href = "http://shalinguyen.github.io/socialicious/">http://shalinguyen.github.io/socialicious/</a></p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_socialbox_settings($attrs, $text) {
+  $form['icon'] = array(
+    '#title' => t('Icon'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'admin/ajax/progressive_shortcodes/socialbox_autocomplete',
+    '#default_value' => isset($attrs['icon']) ? $attrs['icon'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );  
+  $form['link'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link'),
+    '#default_value' => isset($attrs['link']) ? $attrs['link'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  return $form;
+}
+
+function progressive_shortcodes_ajax_socialbox_autocomplete($str) {
+  $icons = array('icon-twitter', 'icon-dribbble', 'icon-facebook', 'icon-duckduckgo', 'icon-aim', 'icon-delicious', 'icon-paypal', 'icon-android', 'icon-gplus', 'icon-lanyrd', 'icon-stumbleupon', 'icon-fivehundredpx', 'icon-pinterest', 'icon-bitcoin', 'icon-w3c', 'icon-foursquare', 'icon-html5', 'icon-ie', 'icon-grooveshark', 'icon-ninetyninedesigns', 'icon-forrst', 'icon-spotify', 'icon-reddit', 'icon-gowalla', 'icon-appstore', 'icon-blogger', 'icon-cc', 'icon-evernote', 'icon-flickr', 'icon-google', 'icon-viadeo', 'icon-instapaper', 'icon-klout', 'icon-linkedin', 'icon-meetup', 'icon-vk', 'icon-disqus', 'icon-rss', 'icon-skype', 'icon-youtube', 'icon-vimeo', 'icon-windows', 'icon-xing', 'icon-yahoo', 'icon-chrome', 'icon-macstore', 'icon-amazon', 'icon-steam', 'icon-dropbox', 'icon-cloudapp', 'icon-ebay', 'icon-github', 'icon-googleplay', 'icon-itunes', 'icon-plurk', 'icon-songkick', 'icon-lastfm', 'icon-gmail', 'icon-pinboard', 'icon-openid', 'icon-quora', 'icon-soundcloud', 'icon-tumblr', 'icon-eventasaurus', 'icon-wordpress', 'icon-yelp', 'icon-intensedebate', 'icon-eventbrite', 'icon-scribd', 'icon-posterous', 'icon-stripe', 'icon-opentable', 'icon-instagram', 'icon-dwolla', 'icon-appnet', 'icon-statusnet', 'icon-acrobat', 'icon-drupal', 'icon-pocket', 'icon-bitbucket', 'icon-flattr', 'icon-eventful', 'icon-smashmag', 'icon-wordpress', 'icon-calendar', 'icon-call', 'icon-guest', 'icon-weibo', 'icon-plancast', 'icon-email', 'icon-myspace', 'icon-podcast', 'icon-cart');
+  $matches = array();
+  foreach ($icons as $icon) {
+    if(stripos($icon, $str) !== FALSE) {
+      $matches[$icon] = $icon;
+    }
+  }
+  drupal_json_output($matches);
+}
+
+function progressive_shortcodes_shortcode_pricing_table($attrs, $text) {
+  $attrs['class'] = isset($attrs['class']) ? $attrs['class'] . ' ' : '';
+  $colors = array('default' => 'package', 'orange' => 'pricing pricing-warning','red' => 'pricing-error pricing', 'green' => 'pricing-success pricing', 'blue' => 'pricing-info pricing');
+  $btn_colors = array('default' => 'default', 'orange' => 'warning','red' => 'error', 'green' => 'success', 'blue' => 'info');
+  $attrs['class'] .= isset($attrs['color']) && isset($colors[$attrs['color']]) ? $colors[$attrs['color']] : '';
+  $link = isset($attrs['link']) ? (strpos($attrs['link'], '#') === FALSE ? url($attrs['link']) : $attrs['link']) : '#';
+  $read_more_link = isset($attrs['read_more_link']) ? (strpos($attrs['read_more_link'], '#') === FALSE ? url($attrs['read_more_link']) : $attrs['read_more_link']) :$link;
+  $icon_colors = array('orange' => '#1e1e1e', 'red' => '#de2a61', 'green' => '#9ab71a', 'blue' => '#35beeb');
+  $icon_color = isset($attrs['color']) && isset($icon_colors[$attrs['color']]) ? $icon_colors[$attrs['color']]  : '#f89406';
+  $stars = '';
+  if (isset($attrs['stars']) && (int)$attrs['stars'] <= 5) {
+    $stars = '<div class="rating-box">
+      <div style="width: ' . (20 * $attrs['stars']) . '%" class="rating">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="73px" height="12px" viewBox="0 0 73 12" enable-fwb-bg="new 0 0 73 12" xml:space="preserve">
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="#1e1e1e" points="6.5,0 8,5 13,5 9,7.7 10,12 6.5,9.2 3,12 4,7.7 0,5 5,5"></polygon>
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="#1e1e1e" points="66.5,0 68,5 73,5 69,7.7 70,12 66.5,9.2 63,12 64,7.7 60,5 65,5 "></polygon>
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="#1e1e1e" points="21.5,0 23,5 28,5 24,7.7 25,12 21.5,9.2 18,12 19,7.7 15,5 20,5 "></polygon>
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="#1e1e1e" points="51.5,0 53,5 58,5 54,7.7 55,12 51.5,9.2 48,12 49,7.7 45,5 50,5 "></polygon>
+            <polygon fill-rule="evenodd" clip-rule="evenodd" fill="#1e1e1e" points="36.5,0 38,5 43,5 39,7.7 40,12 36.5,9.2 33,12 34,7.7 30,5 35,5 "></polygon>
+        </svg>
+      </div>
+    </div>';
+  }
+  $pricing_table_rows = $text;
+  $pricing_table_rows = !empty($pricing_table_rows) ? '<ul class="options">' . $pricing_table_rows . '</ul>' : '';
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>
+    <div class="title"><a href="' . $link . '">' . $attrs['title'] . '</a></div>
+    <div class="price-box">' .
+      (isset($attrs['livicon']) ? '
+      <div class="icon pull-right border ' . (isset($attrs['color']) && $attrs['color'] == 'default' ? 'bg-white rounded' : 'circle') . '">
+        <span class="livicon" data-n="' . $attrs['livicon'] . '" data-s="' . (isset($attrs['color']) && $attrs['color'] == 'default' ? 62 : 32) . '" data-c="' . $icon_color . '" data-hc="0"></span>
+      </div>' : '') .
+      (isset($attrs['description']) ? '<div class="description">' . $attrs['description'] . '</div>' : '') .
+      (isset($attrs['price_top_text']) ? '<div class="starting">' . $attrs['price_top_text'] . '</div>' : '') . '
+      <div class="price">' . $attrs['price'] . (isset($attrs['price_text']) ? '<span>' . $attrs['price_text'] . '</span>' : '') . '</div>
+    </div>
+    ' . $pricing_table_rows . '
+    <div class="bottom-box">
+      ' . (isset($attrs['read_more']) ? '<a href="' . $read_more_link . '" class="more">' . $attrs['read_more'] . ' <span class="fa fa-angle-right"></span></a>' : '') . '
+      ' . $stars .
+      (isset($attrs['button']) ? '<a href="' . $link . '" class="btn btn-lg ' . (isset($attrs['color']) ? 'btn-' . $btn_colors[$attrs['color']] : 'btn-default' ) . ' clearfix">' . $attrs['button'] . '</a>' : '') . '
+    </div>
+  </div>';
+  $pricing_table_rows = '';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_pricing_table_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Pricing Table:</strong><br/>[pricing_table title = "Basic" price = "19" price_top_text = "Starting at" price_text = "/month" link = "shop" button = "Buy Now" livicon = "" stars = 3 color = "green" read_more = "Read More"]<br/>
+  &nbsp;[pricing_table_row disabled check]Text[/pricing_table_row]<br/>
+  [/pricing_table]</br>';
+  $output[] = 'Available variables: <strong>title</strong>, <strong>price</strong>, <strong>price_text</strong>, <strong>price_top_text</strong>, <strong>button</strong>, <strong>link</strong>, <strong>color</strong>, <strong>stars</strong>, <strong>read_more</strong>.<br/>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_pricing_table_settings($attrs, $text) {
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => isset($attrs['title']) ? $attrs['title'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-8">',
+  );
+  $colors = array('orange' => t('Orange'), 'red' => t('Red'), 'green' => t('Green'), 'blue' => t('Blue'), 'default' => t('Default'));
+  $form['color'] = array(
+    '#type' => 'radios',
+    '#title' => t('Color'),
+    '#options' => $colors,
+    '#default_value' => isset($attrs['color']) ? $attrs['color'] : 'orange',
+    '#attributes' => array('class' => array('color-radios')),
+    '#prefix' => '</div><div class = "col-sm-4">',
+    '#suffix' => '</div></div>',
+  );
+  $form['description'] = array(
+    '#type' => 'textarea',
+    '#rows' => 3,
+    '#title' => t('Short Description'),
+    '#default_value' => isset($attrs['description']) ? $attrs['description'] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['price_top_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Price Top Text'),
+    '#default_value' => isset($attrs['price_top_text']) ? $attrs['price_top_text'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-4">'
+  );
+  $form['price'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Price'),
+    '#default_value' => isset($attrs['price']) ? $attrs['price'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-4">',
+  );
+  $form['price_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Price small text'),
+    '#default_value' => isset($attrs['price_text']) ? $attrs['price_text'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-4">',
+    '#suffix' => '</div></div>',
+  );
+  $stars = array('', 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5);
+  $form['stars'] = array(
+    '#type' => 'select',
+    '#title' => t('Stars'),
+    '#options' => array_combine($stars, $stars),
+    '#default_value' => isset($attrs['stars']) ? $attrs['stars'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['livicon'] = array(
+    '#type' => 'textfield',
+    '#title' => t('LivIcon'),
+    '#autocomplete_path' => 'ajax/nd_visualshortcodes/icons_autocomplete/all',
+    '#default_value' => isset($attrs['livicon']) ? $attrs['livicon'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  $form['button'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Button text'),
+    '#default_value' => isset($attrs['button']) ? $attrs['button'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['link'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link'),
+    '#default_value' => isset($attrs['link']) ? $attrs['link'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  $form['read_more'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Read More text'),
+    '#default_value' => isset($attrs['read_more']) ? $attrs['read_more'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['read_more_link'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Read More link'),
+    '#default_value' => isset($attrs['read_more_link']) ? $attrs['read_more_link'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_pricing_table_row($attrs, $text) {
+  $attrs['dis'] = isset($attrs['disabled']) ? $attrs['disabled'] : (isset($attrs['dis']) ? $attrs['dis'] : 0);
+  $attrs['class'] = (isset($attrs['class']) ? $attrs['class'] : '') . ($attrs['dis'] ? '' : 'active');
+  $checked = isset($attrs['check']) && $attrs['check'] ? '<span><i class="fa fa-check"></i></span>' : '';
+  $title = isset($attrs['title']) ? $attrs['title'] : '';
+  return '<li ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>' . $checked . $title . $text . '</li>';
+}
+
+function progressive_shortcodes_shortcode_pricing_table_row_settings($attrs, $text) {
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => isset($attrs['title']) ? $attrs['title'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#description' => t('You can also insert in this shortcode any other shortcode')
+  );
+  $attrs['dis'] = isset($attrs['disabled']) ? $attrs['disabled'] : (isset($attrs['dis']) ? $attrs['dis'] : 0);
+  $form['dis'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Disabled'),
+    '#default_value' => $attrs['dis'],
+  );
+  $form['check'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Check icon'),
+    '#default_value' => isset($attrs['check']) ? $attrs['check'] : 0,
+  );
+  return $form;
+}
+
+function progressive_shortcodes_ajax_livicons_autocomplete($str) {
+  $icons = array('at', 'balloons', 'bank', 'bomb', 'calculator', 'folders', 'ice-cream', 'medkit', 'paper-plane', 'wine', 'address-book', 'adjust', 'alarm', 'albums', 'align-center', 'align-justify', 'align-left', 'align-right', 'anchor', 'android', 'angle-double-down', 'angle-double-left', 'angle-double-right', 'angle-double-up', 'angle-down', 'angle-left', 'angle-right', 'angle-up', 'angle-wide-down', 'angle-wide-left', 'angle-wide-right', 'angle-wide-up', 'apple', 'apple-logo', 'archive-add', 'archive-extract', 'arrow-circle-down', 'arrow-circle-left', 'arrow-circle-right', 'arrow-circle-up', 'arrow-down', 'arrow-left', 'arrow-right', 'arrow-up', 'asterisk', 'balance', 'ban', 'barchart', 'barcode', 'battery', 'beer', 'bell', 'bing', 'biohazard', 'bitbucket', 'blogger', 'bluetooth', 'bold', 'bolt', 'bookmark', 'bootstrap', 'briefcase', 'brightness-down', 'brightness-up', 'brush', 'bug', 'calendar', 'camcoder', 'camera', 'camera-alt', 'car', 'caret-down', 'caret-left', 'caret-right', 'caret-up', 'cellphone', 'certificate', 'check', 'check-circle', 'check-circle-alt', 'checked-off', 'checked-on', 'chevron-down', 'chevron-left', 'chevron-right', 'chevron-up', 'chrome', 'circle', 'circle-alt', 'clapboard', 'clip', 'clock', 'cloud', 'cloud-bolts', 'cloud-down', 'cloud-rain', 'cloud-snow', 'cloud-sun', 'cloud-up', 'code', 'collapse-down', 'collapse-up', 'columns', 'comment', 'comments', 'compass', 'concrete5', 'connect', 'credit-card', 'crop', 'css3', 'dashboard', 'desktop', 'deviantart', 'disconnect', 'doc-landscape', 'doc-portrait', 'download', 'download-alt', 'dribbble', 'drop', 'dropbox', 'edit', 'exchange', 'expand-left', 'expand-right', 'external-link', 'eye-close', 'eye-open', 'eyedropper', 'facebook', 'facebook-alt', 'file-export', 'file-import', 'film', 'filter', 'fire', 'firefox', 'flag', 'flickr', 'flickr-alt', 'folder-add', 'folder-flag', 'folder-lock', 'folder-new', 'folder-open', 'folder-remove', 'font', 'gear', 'gears', 'ghost', 'gift', 'github', 'github-alt', 'glass', 'globe', 'google-plus', 'google-plus-alt', 'hammer', 'hand-down', 'hand-left', 'hand-right', 'hand-up', 'heart', 'heart-alt', 'help', 'home', 'html5', 'ie', 'image', 'inbox', 'inbox-empty', 'inbox-in', 'inbox-out', 'indent-left', 'indent-right', 'info', 'instagram', 'ios', 'italic', 'jquery', 'key', 'lab', 'laptop', 'leaf', 'legal', 'linechart', 'link', 'linkedin', 'linkedin-alt', 'list', 'list-ol', 'list-ul', 'livicon', 'location', 'lock', 'magic', 'magic-alt', 'magnet', 'mail', 'mail-alt', 'map', 'medal', 'message-add', 'message-flag', 'message-in', 'message-lock', 'message-new', 'message-out', 'message-remove', 'microphone', 'minus', 'minus-alt', 'money', 'moon', 'more', 'morph-c-o', 'morph-c-s', 'morph-c-t-down', 'morph-c-t-left', 'morph-c-t-right', 'morph-c-t-up', 'morph-o-c', 'morph-o-s', 'morph-o-t-down', 'morph-o-t-left', 'morph-o-t-right', 'morph-o-t-up', 'morph-s-c', 'morph-s-o', 'morph-s-t-down', 'morph-s-t-left', 'morph-s-t-right', 'morph-s-t-up', 'morph-t-down-c', 'morph-t-down-o', 'morph-t-down-s', 'morph-t-left-c', 'morph-t-left-o', 'morph-t-left-s', 'morph-t-right-c', 'morph-t-right-o', 'morph-t-right-s', 'morph-t-up-c', 'morph-t-up-o', 'morph-t-up-s', 'move', 'music', 'myspace', 'new-window', 'notebook', 'opera', 'pacman', 'paypal', 'pen', 'pencil', 'phone', 'piechart', 'piggybank', 'pin-off', 'pin-on', 'pinterest', 'pinterest-alt', 'plane-down', 'plane-up', 'playlist', 'plus', 'plus-alt', 'presentation', 'printer', 'qrcode', 'question', 'quote-left', 'quote-right', 'raphael', 'recycled', 'reddit', 'redo', 'refresh', 'remove', 'remove-alt', 'remove-circle', 'resize-big', 'resize-big-alt', 'resize-horizontal', 'resize-horizontal-alt', 'resize-small', 'resize-small-alt', 'resize-vertical', 'resize-vertical-alt', 'responsive', 'responsive-menu', 'retweet', 'rocket', 'rotate-left', 'rotate-right', 'rss', 'safari', 'sandglass', 'save', 'scissors', 'screen-full', 'screen-full-alt', 'screen-small', 'screen-small-alt', 'screenshot', 'search', 'servers', 'settings', 'share', 'shield', 'shopping-cart', 'shopping-cart-in', 'shopping-cart-out', 'shuffle', 'sign-in', 'sign-out', 'signal', 'sitemap', 'sky-dish', 'skype', 'sort', 'sort-down', 'sort-up', 'soundcloud', 'speaker', 'spinner-five', 'spinner-four', 'spinner-one', 'spinner-seven', 'spinner-six', 'spinner-three', 'spinner-two', 'star-empty', 'star-full', 'star-half', 'stopwatch', 'striked', 'stumbleupon', 'stumbleupon-alt', 'sun', 'table', 'tablet', 'tag', 'tags', 'tasks', 'text-decrease', 'text-height', 'text-increase', 'text-size', 'text-width', 'thermo-down', 'thermo-up', 'thumbnails-big', 'thumbnails-small', 'thumbs-down', 'thumbs-up', 'timer', 'trash', 'tree', 'trophy', 'truck', 'tumblr', 'twitter', 'twitter-alt', 'umbrella', 'underline', 'undo', 'unlink', 'unlock', 'upload', 'upload-alt', 'user', 'user-add', 'user-ban', 'user-flag', 'user-remove', 'users', 'users-add', 'users-ban', 'users-remove', 'vector-circle', 'vector-curve', 'vector-line', 'vector-polygon', 'vector-square', 'video-backward', 'video-eject', 'video-fast-backward', 'video-fast-forward', 'video-forward', 'video-pause', 'video-play', 'video-play-alt', 'video-step-backward', 'video-step-forward', 'video-stop', 'vimeo', 'vk', 'warning', 'warning-alt', 'webcam', 'wifi', 'wifi-alt', 'windows', 'windows8', 'wordpress', 'wordpress-alt', 'wrench', 'xing', 'yahoo', 'youtube', 'zoom-in', 'zoom-out');
+  $matches = array();
+  foreach ($icons as $icon) {
+    if(stripos($icon, $str) !== FALSE) {
+      $matches[$icon] = $icon;
+    }
+  }
+  drupal_json_output($matches);
+}
+
+function progressive_shortcodes_shortcode_view($attrs, $text) {
+  $attrs['class'] = isset($attrs['class']) ? $attrs['class'] : '';
+  $view = '';
+  if (strpos($attrs['admin_url'], 'admin/structure/views/view') !== FALSE) {
+    $view_name = substr($attrs['admin_url'], strpos($attrs['admin_url'], 'view/') + 5);
+    $parts = explode('/', $view_name);
+    $view_name = $parts[0];
+    $view = isset($parts[2]) ? views_embed_view($view_name, $parts[2]) : views_embed_view($view_name);
+  }
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>' . $view . '</div>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_view_settings($attrs, $text) {
+  $views = views_get_all_views();
+  $displays = array();
+  foreach ($views as $view) {
+    foreach($view->display as $display) {
+      if($display->display_title != 'Master') {
+        $displays['admin/structure/views/view/' . $view->name . '/edit/' . $display->id] = check_plain($view->human_name . ': ' . $display->display_title);
+      }
+    }
+  }
+  $form['admin_url'] = array(
+    '#title' => t('View'),
+    '#type' => 'select',
+    '#options' => $displays,
+    '#default_value' => isset($attrs['admin_url']) ? $attrs['admin_url'] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_view_description($attrs, $text) {
+  if (strpos($attrs['admin_url'], 'admin/structure/views/view') !== FALSE) {
+    $form = progressive_shortcodes_shortcode_view_settings($attrs, $text);
+    $value = l($form['admin_url']['#options'][$attrs['admin_url']], $attrs['admin_url'], array('attributes' => array('target' => '_blank')));
+    return $value;
+  }
+}
+
+function progressive_shortcodes_shortcode_block($attrs, $text) {
+  if (strpos($attrs['admin_url'], 'admin/structure/block') !== FALSE) {
+    $block_name = substr($attrs['admin_url'], strpos($attrs['admin_url'], '/manage/') + 8);
+    $parts = explode('/', $block_name);
+    $block = _nikadevs_render_block($parts[0], $parts[1]);
+    $block = render($block);
+  }
+  $attrs_output = _progressive_shortcodes_shortcode_attributes($attrs);
+  $text = $attrs_output ? '<div ' . $attrs_output  . '>' . $block . '</div>' : $block;
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_block_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Block:</strong><br/>[block admin_url = "admin/structure/block/manage/progressive_cms/gmap/configure"][/block]</br>';
+  $output[] = '<strong>admin_url</strong> - URL of the block edit page.</p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_block_settings($attrs, $text) {
+  module_load_include('inc', 'block', 'block.admin');
+  $current_theme = variable_get('theme_default', 'none');
+  $blocks = block_admin_display_prepare_blocks($current_theme);
+  usort($blocks, '_sort_blocks');
+  $options = array();
+  foreach ($blocks as $block) {
+    $options['admin/structure/block/manage/' . $block['module']  .'/' . $block['delta'] . '/configure'] = check_plain($block['info']);
+  }
+  asort($options);
+  $form['admin_url'] = array(
+    '#title' => t('Block'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => isset($attrs['admin_url']) ? $attrs['admin_url'] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_block_description($attrs, $text) {
+  if (strpos($attrs['admin_url'], 'admin/structure/block') !== FALSE) {
+    $form = progressive_shortcodes_shortcode_block_settings($attrs, $text);
+    $value = l($form['admin_url']['#options'][$attrs['admin_url']], $attrs['admin_url'], array('attributes' => array('target' => '_blank')));
+    return $value;
+  }
+}
+
+function progressive_shortcodes_shortcode_node($attrs, $text) {
+  if (isset($attrs['admin_url']) && strpos($attrs['admin_url'], 'node/') !== FALSE) {
+    $node_name = substr($attrs['admin_url'], strpos($attrs['admin_url'], 'node/') + 5);
+    $parts = explode('/', $node_name);
+    $node = node_load($parts[0]);
+    if($node && $node->nid) {
+      $node = node_view($node);
+      $output = render($node);
+      $attrs = _progressive_shortcodes_shortcode_attributes($attrs);
+      $text = $attrs ? '<div ' . $attrs  . '>' . $output . '</div>' : $output;
+      return $text;
+    }
+  }
+}
+
+function progressive_shortcodes_shortcode_node_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Node:</strong><br/>[node admin_url = "node/1/edit"][/node]</br>';
+  $output[] = '<strong>admin_url</strong> - URL of the node edit page.</p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_node_description($attrs, $text) {
+  if (strpos($attrs['admin_url'], 'node/') !== FALSE) {
+    $node_name = substr($attrs['admin_url'], strpos($attrs['admin_url'], 'node/') + 5);
+    $parts = explode('/', $node_name);
+    $nid = $parts[0];
+    if(is_numeric($nid)) {
+      $node = node_load($nid);
+      return l($node->title, 'node/' . $nid . '/edit', array('attributes' => array('target' => '_blank')));
+    }
+  }
+}
+
+function progressive_shortcodes_shortcode_node_settings($attrs, $text) {
+  $form['admin_url'] = array(
+    '#title' => t('Node Title'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'admin/ajax/nd_visualshortcodes/node_autocomplete',
+    '#default_value' => isset($attrs['admin_url']) ? $attrs['admin_url'] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_quicklinks($attrs, $text) {
+  if (isset($attrs['machine_name']) && $attrs['machine_name']) {
+    $menu_tree = menu_tree_all_data($attrs['machine_name']);
+    return '<div class = "sidebar"><nav class = "menu">' . _progressive_shortcodes_quicklinks($menu_tree) . '</nav></div>';
+  }
+  return '';
+}
+
+function _progressive_shortcodes_quicklinks($items, $class = '') {
+  $output = '<ul ' . ($class ? 'class = "' . $class . '"' : ''). '>';
+  foreach($items as $item) {
+    $class = !empty($item['below']) ? 'class = "parent' . ($item['link']['expanded'] ? ' active' : '') . '"': '';
+    $title = !empty($item['below']) ? '<span class="open-sub"></span>' : '';
+    $output .= '<li ' . $class . '>' . l($title . t($item['link']['link_title']), $item['link']['link_path'], array('html' => TRUE));
+    if(!empty($item['below'])) {
+      $output .= _progressive_shortcodes_quicklinks($item['below'], 'sub');
+    }
+    $output .= '</li>';
+  }
+  return $output . '</ul>';
+}
+
+function progressive_shortcodes_shortcode_quicklinks_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Quick Links:</strong><br/>[quicklinks machine_name = "menu-quick-links"][/quicklinks]</br>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_quicklinks_settings($attrs, $text) {
+  $menus = db_select('menu_custom', 'm')->fields('m', array('menu_name', 'title'))->orderBy('m.title')->execute()->fetchAllKeyed(0, 1);
+  $form['machine_name'] = array(
+    '#title' => t('Menu'),
+    '#type' => 'select',
+    '#options' => $menus,
+    '#default_value' => isset($attrs['machine_name']) ? $attrs['machine_name'] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_container($attrs, $text) {
+  $attrs['class'] = 'container ' . (isset($attrs['class']) ? $attrs['class'] : '');
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) .'>' . $text . '</div>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_container_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Responsive container:</strong><br/>[container]Content[/container]</br>';
+  $output[] = 'Use this for non-full width content.</p>';
+  $output[] = '<p><strong>Responsive columns:</strong><br/>[row]<br/>[col phone = 12 tablet = 12 desktop = 6 wide = 6]Content with date[/col][/row]</br>';
+  $output[] = 'Describe how many rows will take col in different devices: phone, tablet, desktop, wide. From 1 to 12 rows.</p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_row($attrs, $text) {
+  $attrs['class'] = 'row ' . (isset($attrs['class']) ? $attrs['class'] : '');
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) .'>' . $text . '</div>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_col($attrs, $text) {
+  $attrs['class'] = isset($attrs['class']) ? $attrs['class'] : '';
+  if(isset($attrs['phone'])) {
+    $attrs['class'] .= ' col-xs-' . $attrs['phone'];
+  }
+  if(isset($attrs['tablet'])) {
+    $attrs['class'] .= ' col-sm-' . $attrs['tablet'];
+  }
+  if(isset($attrs['desktop'])) {
+    $attrs['class'] .= ' col-md-' . $attrs['desktop'];
+  }
+  if(isset($attrs['wide'])) {
+    $attrs['class'] .= ' col-lg-' . $attrs['wide'];
+  }
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>' . $text . '</div>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_message($attrs, $text) {
+  $attrs['class'] = 'alert ' . (isset($attrs['extra_class']) ? $attrs['extra_class'] : '');
+  $attrs['class'] .= isset($attrs['dismissable']) && $attrs['dismissable'] ? ' fade in' : '';
+  $attrs['class'] .= isset($attrs['color']) && $attrs['color'] ? ' ' . $attrs['color'] : '';
+  $attrs['class'] .= isset($attrs['center']) && $attrs['center'] ? ' text-center' : '';
+  $attrs['class'] .= isset($attrs['type']) && $attrs['type'] == 'border' ? ' alert-border alert-dismissable' : '';
+  if(isset($attrs['type']) && $attrs['type'] == 'border' && isset($attrs['color_type']) && $attrs['color_type'] && $attrs['custom_color']) {
+    $attrs['style_border_color'] = '#' . trim($attrs['custom_color'], '#');
+  }
+  $icon = isset($attrs['icon']) && $attrs['icon'] ? '<i class="' . $attrs['icon'] . ' alert-icon"></i>' : '';
+  $text = (isset($attrs['dismissable']) && $attrs['dismissable'] ? '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>' : '' ). $text;
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>' . $icon . $text . '</div>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_message_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Message box:</strong><br/>[message][/message]</br>';
+  $output[] = 'Available classes: alert-danger, alert-info, alert-warning, alert-success, alert-dismissable.</p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_message_settings($attrs, $text) {
+  $form['color_type'] = array(
+    '#title' => t('Custom Color'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['color_type']) ? $attrs['color_type'] : FALSE,
+    '#attributes' => array('class' => array('color-type-select')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $colors = array('grey' => t('Grey'), 'alert-black' => t('Black'), 'alert-danger' => t('Red'), 'alert-info' => t('Blue'), 'alert-warning' => t('Orange'), 'alert-success' => t('Green'));
+  $form['color'] = array(
+    '#type' => 'radios',
+    '#title' => t('Color'),
+    '#options' => $colors,
+    '#default_value' => isset($attrs['color']) ? $attrs['color'] : '',
+    '#attributes' => array('class' => array('color-radios')),
+    '#states' => array(
+      'visible' => array(
+        '.color-type-select' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['custom_color'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Color'),
+    '#default_value' => isset($attrs['custom_color']) ? $attrs['custom_color'] : '',
+    '#states' => array(
+      'visible' => array(
+        '.color-type-select' => array('checked' => TRUE),
+      ),
+    ),
+    '#attributes' => array('class' => array('form-control colorpicker-enable')),
+  );
+  $form['dismissable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Dismissable'),
+    '#default_value' => isset($attrs['dismissable']) ? $attrs['dismissable'] : TRUE,
+    '#prefix' => '</div><div class = "col-sm-6">',
+  );
+  $form['icon'] = array(
+    '#title' => t('Icon'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'admin/ajax/nd_visualshortcodes/icons_autocomplete/all',
+    '#default_value' => isset($attrs['icon']) ? $attrs['icon'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>'
+  );
+  $options = array('background' => t('Background'), 'border' => t('Border'));
+  $form['type'] = array(
+    '#title' => t('Colored'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['center'] = array(
+    '#title' => t('Center Align'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['center']) ? $attrs['center'] : FALSE,
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>'
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_button($attrs, $text) {
+  $attrs['extra_classes'] = isset($attrs['extra_classes']) ? $attrs['extra_classes'] : '';
+  $attrs['extra_classes'] .= isset($attrs['color']) && (!isset($attrs['color_type']) || !$attrs['color_type']) ? ' ' . $attrs['color'] : '';
+  $attrs['extra_classes'] .= isset($attrs['size']) ? ' ' . $attrs['size'] : '';
+  $attrs['type'] = isset($attrs['type']) ? $attrs['type'] : 'default';
+  $styles = array(
+    'default' => 'btn',
+    'outlined' => 'btn btn-border',
+    'social_squared' => 'sbtnf sbtnf-squere sbtnf-icon-white sbtnf-icon-bg-black color',
+    'social_rounded' => 'sbtnf sbtnf-rounded sbtnf-icon-white sbtnf-icon-bg-black color',
+    'social_heavily_rounded' => 'sbtnf sbtnf-circle sbtnf-icon-white sbtnf-icon-bg-black color',
+    'block' => 'btn btn-block'
+  );
+  $attrs['extra_classes'] .= ' ' . $styles[$attrs['type']];
+  if(isset($attrs['color_type']) && $attrs['color_type'] && isset($attrs['custom_color']) && $attrs['custom_color']) {
+    $attrs['style_background_color'] = trim($attrs['custom_color'], '#');
+    if(strtolower($attrs['style_background_color']) == 'ffffff') {
+      $attrs['extra_classes'] .= ' btn-white';
+    }
+  }
+  $attrs['link'] = isset($attrs['link']) ? $attrs['link'] : '#';
+  $attrs['href'] = strpos($attrs['link'], '#') === FALSE ? url($attrs['link']) : $attrs['link'];
+  $attrs['target'] = isset($attrs['new_tab']) && $attrs['new_tab'] ? '_blank' : '';
+  $text .= isset($attrs['text']) ? $attrs['text'] : '';
+  $text = isset($attrs['icon']) ? '<i class = "' . $attrs['icon'] . '"></i>&nbsp; ' . $text : $text;
+  $text = '<a ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>' . $text . '</a>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_button_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Button Link:</strong><br/>[button class="btn-lg btn-default" link = "contact"]Text[/button]</br>';
+  $output[] = '<strong>link</strong> - URL to linked content.</br>';
+  $output[] = 'Available size classes: <strong>btn-lg</strong> - Big, <strong>btn-sm</strong> - Small, by default - Medium.</br>';
+  $output[] = 'Available color classes: <strong>btn-default</strong>, <strong>btn-primary</strong>, <strong>btn-info</strong>, <strong>btn-success</strong>, <strong>btn-warning</strong>, <strong>btn-danger</strong></p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_button_settings($attrs, $text) {
+  $form['icon'] = array(
+    '#title' => t('Icon'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'admin/ajax/nd_visualshortcodes/icons_autocomplete/all',
+    '#default_value' => isset($attrs['icon']) ? $attrs['icon'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $styles = array('default' => t('Default'),  'outlined' => t('Outlined'), 'social_squared' => t('Social Squared'), 'social_rounded' => t('Social Smoothly Rounded'), 'social_heavily_rounded' => t('Social Heavily Rounded'), 'block' => t('Block button'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Style'),
+    '#options' => $styles,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  $form['color_type'] = array(
+    '#title' => t('Custom Color'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['color_type']) ? $attrs['color_type'] : FALSE,
+    '#attributes' => array('class' => array('color-type-select')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $colors = array('btn-danger' => t('Red'), 'btn-info' => t('Blue'), 'btn-warning' => t('Orange'), 'btn-success' => t('Green'), 'btn-primary' => t('Dark Blue'), 'btn-inverse' => t('Inverse'));
+  $form['color'] = array(
+    '#type' => 'radios',
+    '#title' => t('Color'),
+    '#options' => $colors,
+    '#default_value' => isset($attrs['color']) ? $attrs['color'] : 'btn-info',
+    '#attributes' => array('class' => array('color-radios')),
+    '#states' => array(
+      'visible' => array(
+        '.color-type-select' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['custom_color'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Color'),
+    '#default_value' => isset($attrs['custom_color']) ? $attrs['custom_color'] : '',
+    '#states' => array(
+      'visible' => array(
+        '.color-type-select' => array('checked' => TRUE),
+      ),
+    ),
+    '#attributes' => array('class' => array('form-control colorpicker-enable')),
+  );
+  $sizes = array('btn-xs' => t('Small'),  'btn-sm' => t('Medium'), '' => t('Default'), 'btn-lg' => t('Large'));
+  $form['size'] = array(
+    '#type' => 'select',
+    '#title' => t('Size'),
+    '#options' => $sizes,
+    '#default_value' => isset($attrs['size']) ? $attrs['size'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  $form['text'] = array(
+    '#title' => t('Text'),
+    '#type' => 'textfield',
+    '#default_value' => isset($attrs['text']) ? $attrs['text'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['link'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link'),
+    '#default_value' => isset($attrs['link']) ? $attrs['link'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  $form['new_tab'] = array(
+    '#title' => t('Open link in new tab'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['new_tab']) ? $attrs['new_tab'] : FALSE,
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+    '#suffix' => '</div></div>'
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_accordions($attrs, $text) {
+  global $accordion_id, $accordion_filter;
+  $attrs['class'] = 'panel-group ' . (isset($attrs['class']) ? ' ' . $attrs['class'] : '');
+  $attrs['class'] .= isset($attrs['multi_collapse']) ? ' multi-collapse' : '';
+  if(!empty($accordion_filter)) {
+    $attrs['class'] .= ' filter-elements';
+  }
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . ' id = "accordion' . $accordion_id . '">' . $text . '</div>';
+  if(!empty($accordion_filter)) {
+    $output = '<div class="filter-box accordions-filter">
+      <div class="btn-group filter-buttons filter-list">
+        <button type="button" class="dropdown-toggle" data-toggle="dropdown">
+          ' . t('All') . ' <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+          <li><a href="#" data-filter="*" class="active">' . t('All') . '</a></li>';
+    foreach($accordion_filter as $plain => $title) {
+      $output .= '<li><a href="#" data-filter=".' . $plain . '">' . $title .  '</a></li>';
+    }
+    $output .= '     
+        </ul>
+        <div class="clearfix"></div>
+      </div>';
+    $text = $output . $text . '</div>';
+  }
+  $accordion_id++;
+  $accordion_filter = array();
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_accordions_settings($attrs, $text) {
+  $form['multi_collapse'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Multi Collapse mode'),
+    '#default_value' => isset($attrs['multi_collapse']) ? $attrs['multi_collapse'] : '',
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_accordions_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Accordion:</strong><br/>[accordions]<br/>&nbsp;&nbsp;[accordion title = "Accordion Panel #1" active]Text[/accordion]<br/>[/accordions]';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_accordion($attrs, $text) {
+  global $accordion_count, $accordion_id, $accordion_filter;
+  if (empty($accordion_id)) {
+    $accordion_id = rand(1, 999999);
+  }
+  if(!isset($accordion_filter)) {
+    $accordion_filter = array();
+  }
+  $accordion_count = empty($accordion_count) ? rand(1, 999999) : $accordion_count + 1;
+  $attrs['class'] = (isset($attrs['class']) ? $attrs['class'] . ' ': '') . 'panel ';
+  $attrs['class'] .= isset($attrs['color']) && $attrs['color'] ? $attrs['color'] : 'panel-default';
+  $attrs['class'] .= isset($attrs['active']) && $attrs['active'] ? ' active' : '';
+  if(isset($attrs['filter_category'])) {
+    $filter_category = isset($attrs['filter_category']) ? strtolower(preg_replace('/[^\w]/', '-', $attrs['filter_category'])) : '';
+    $attrs['class'] .= ' ' . $filter_category;
+    $accordion_filter[$filter_category] = $attrs['filter_category']; 
+  }
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>
+    <div class="panel-heading">
+      <div class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion' . $accordion_id . '" href="#accordion-' .  $accordion_count . '">
+          ' . $attrs['title'] . '
+        </a>
+      </div>
+    </div>
+    <div id="accordion-' . $accordion_count . '" class="panel-collapse collapse' . (isset($attrs['active']) && $attrs['active'] ? ' in' : '') . '">
+      <div class="panel-body">
+        ' . $text . '
+      </div>
+    </div>
+  </div>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_accordion_settings($attrs, $text) {
+  $form['active'] = array(
+    '#title' => t('Active'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['active']) ? $attrs['active'] : '',
+  );
+  $colors = array('panel-default' => t('Default'), 'panel-danger' => t('Red'), 'panel-info' => t('Blue'), 'panel-success' => t('Green'), 'panel-primary' => t('Dark Blue'));
+  $form['color'] = array(
+    '#type' => 'radios',
+    '#title' => t('Color'),
+    '#options' => $colors,
+    '#default_value' => isset($attrs['color']) ? $attrs['color'] : 'panel-default',
+    '#attributes' => array('class' => array('color-radios')),
+  );
+  $form['title'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Title'),
+    '#default_value' => isset($attrs['title']) ? $attrs['title'] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['filter_category'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Filter Category'),
+    '#default_value' => isset($attrs['filter_category']) ? $attrs['filter_category'] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_image($attrs, $text) {
+  $attrs['class'] = isset($attrs['class']) ? ' ' . $attrs['class'] : '';
+  $attrs['class'] = ' ' . (isset($attrs['type']) && $attrs['type'] == 'title_overlay' ? 'image_overlay' : 'caption');
+  $img_class = isset($attrs['img_rounded']) && $attrs['img_rounded'] ? 'class="img-rounded"' : '';
+  $attrs['caption'] = isset($attrs['caption']) && $attrs['caption'] ? $attrs['caption'] : $text;
+  $file = isset($attrs['fid']) && !empty($attrs['fid']) ? file_load($attrs['fid']) : $attrs['path'];
+  $filename = isset($file->uri) ? file_create_url($file->uri) : $file;
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>
+    <img src="' . $filename . '" ' . $img_class . ' alt="' . (isset($attrs['alt']) ? $attrs['alt'] : '') . '" title="' . (isset($attrs['title']) ? $attrs['title'] : '') . '">
+    ' . (!empty($attrs['caption']) ? '<div class = "description">' . $attrs['caption'] . '</div>' : '') . '
+  </div>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_image_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Image with caption:</strong><br/>[image path="image.png" caption = "Image caption" type = "title_overlay" img_rounded = 1][/image]</br>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_image_settings($attrs, $text) {
+  if(!isset($attrs['fid']) && !$attrs['fid'] && isset($attrs['path'])) {
+    $form['path'] = array(
+      '#type' => 'textfield',
+      '#default_value' => isset($attrs['path']) ? $attrs['path'] : '',
+      '#attributes' => array('class' => array('hidden')),
+    );
+  }
+  $filename = isset($attrs['fid']) && !empty($attrs['fid']) ? file_load($attrs['fid'])->uri : (isset($attrs['path']) ? $attrs['path'] : '');
+  $image = $filename ? theme('image_style', array('style_name' => 'media_thumbnail', 'path' => $filename)) : '';
+  $form['fid'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image'),
+    '#default_value' => isset($attrs['fid']) ? $attrs['fid'] : '',
+    '#attributes' => array('class' => array('image-media-upload hidden')),
+    '#field_suffix' => '<div class = "preview-image">' . $image . '</div><a href = "#" class = "media-upload button">' . t('Upload Image') .'</a><a href = "#" class = "media-remove button">' . t('Remove Image') .'</a>',
+    '#suffix' => '<div class = "clearfix"></div>',
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['img_rounded'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Rounded Image'),
+    '#default_value' => isset($attrs['img_rounded']) ? $attrs['img_rounded'] : '',
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+
+  $form['caption'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Caption'),
+    '#default_value' => isset($attrs['caption']) ? $attrs['caption'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $types = array('title_overlay' => t('Overlay'), 'caption' => t('Caption'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Title type'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_gmap($attrs, $text) {
+  $attrs['class'] = 'map-box' . (isset($attrs['class']) ? ' ' . $attrs['class'] : '');
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>' .
+    (isset($attrs['tooltip']) && $attrs['tooltip'] == 'map_overlay' ? '<div class="contact-info col-sm-6 col-md-6" data-appear-animation="fadeInLeftBig">' . $text . '</div>' : '') . 
+    '<div style="height: ' . (isset($attrs['height']) ? $attrs['height'] : 276) . 'px;"
+      class="map-canvas"
+      data-zoom="' . (isset($attrs['zoom']) ? $attrs['zoom'] : 6) . '"
+      data-lat="' . (isset($attrs['lat']) ? $attrs['lat'] : 0) . '"
+      data-lng="' . (isset($attrs['lng']) ? $attrs['lng'] : 0) . '"
+      ' . (isset($attrs['type']) ? 'data-type="' . $attrs['type'] . '"' : '') . '
+      ' . (isset($attrs['title']) && $attrs['title'] ? 'data-title="' . $attrs['title'] . '"' : '') . '>' .
+      (!isset($attrs['tooltip']) || $attrs['tooltip'] == 'marker_tooltip' ? $text : '') . '
+    </div>
+  </div>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_gmap_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Google Map:</strong><br/>[gmap height = 300 zoom = 5 lat = "40.3456" lng = "-56.8795" title = "New York"]Tooltip text for Marker[/gmap]</br>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_gmap_settings($attrs, $text) {
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => isset($attrs['title']) ? $attrs['title'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-9">',
+  );
+  $types = array('' => t('Default'), 'terrain' => t('Terrain'), 'satellite' => t('Satellite'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Type'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-3">',
+    '#suffix' => '</div></div>'
+  );
+  $form['lat'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Latitude'),
+    '#default_value' => isset($attrs['lat']) ? $attrs['lat'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-3">',
+  );
+  $form['lng'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Longitude'),
+    '#default_value' => isset($attrs['lng']) ? $attrs['lng'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-3">',
+  );
+  $form['zoom'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Zoom'),
+    '#default_value' => isset($attrs['zoom']) ? $attrs['zoom'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-3">',
+  );
+  $form['height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height'),
+    '#default_value' => isset($attrs['height']) ? $attrs['height'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-3">',
+    '#suffix' => '</div></div>',
+  );
+  $types = array('marker_tooltip' => t('Marker Toolip'), 'map_overlay' => t('Map Overlay Box'));
+  $form['tooltip'] = array(
+    '#type' => 'select',
+    '#title' => t('Append inner content to:'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['tooltip']) ? $attrs['tooltip'] : 'marker_tooltip',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+    '#suffix' => '</div></div>'
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_tabs($attrs, $text) {
+  global $tab_content;
+  $attrs['class'] = 'tabs ' . (isset($attrs['class']) ? $attrs['class'] : '') . (isset($attrs['type']) ? $attrs['type'] : '');
+  $text = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>
+    <ul class = "nav nav-tabs">' .
+      $text .
+    '</ul>
+    <div class = "tab-content">' .
+      $tab_content .
+    '</div>
+    <div class="clearfix"></div>
+    </div>';
+  $tab_content = '';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_tabs_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Tabs:</strong><br/>[tabs]<br/>[tab title = "title" icon = "fa fa-user"]Text[/tab]<br>[/tabs]</br>';
+  $output[] = 'Available variables: <strong>title</strong> - tabs of the title, <strong>icon</strong> - font class of the icon.</p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_tabs_settings($attrs, $text) {
+  $types = array('' => t('Horizontal'), 'tabs-left' => t('Vertical Left'), 'tabs-right' => t('Vertical Right'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Type'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-4">',
+    '#suffix' => '</div></div>'
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_tab($attrs, $text) {
+  global $tab_counter;
+  global $tab_content;
+  $tab_counter++;
+  $attrs['class'] = isset($attrs['class']) ? $attrs['class'] : '';
+  $attrs['class'] .= $tab_content == '' ? ' active' : '';
+  $class = shortcode_add_class($attrs['class']);
+  $icon = isset($attrs['icon']) ? '<i class = "' . $attrs['icon'] .'"></i>' : '';
+  $output = '<li ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '><a href = "#tab-' . $tab_counter . '" data-toggle = "tab">' . $icon . (isset($attrs['title']) ? $attrs['title'] : '') . '</a></li>';
+
+  if($tab_content == '') {
+    $class .= ' in';
+  }
+  $tab_content .= '<div class="tab-pane fade ' . $class .  '" id="tab-' . $tab_counter . '">' . $text . '</div>';
+
+  return $output;
+}
+
+function progressive_shortcodes_shortcode_tab_settings($attrs, $text) {
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => isset($attrs['title']) ? $attrs['title'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-9">',
+  );
+  $form['icon'] = array(
+    '#title' => t('Icon'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'admin/ajax/nd_visualshortcodes/icons_autocomplete/all',
+    '#default_value' => isset($attrs['icon']) ? $attrs['icon'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-3">',
+    '#suffix' => '</div></div>'
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_hr($attrs, $text) {
+  $attrs['class'] = (isset($attrs['class']) ? $attrs['class'] : '') . (isset($attrs['type']) ? ' ' . $attrs['type'] : '');
+  $text = '<hr ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '></hr>';
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_hr_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Horizontal Rules:</strong><br/>[hr][/hr]</p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_hr_settings($attrs, $text) {
+  $types = array('' => t('Default'), 'no-line' => t('No Line'), 'shadow' => t('Shadow'), 'dotted' => t('Dotted'), 'dashed' => t('Dashed'), 'double' => t('Double'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Type'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_title($attrs, $text) {
+  $attrs['class'] = isset($attrs['class']) ? ' ' . $attrs['class'] : '';
+  $attrs['class'] .= isset($attrs['underline']) && $attrs['underline'] && (!isset($attrs['type']) || $attrs['type'] != 'page') ? ' title-box' : '';
+  $attrs['class'] .= isset($attrs['title_align']) && $attrs['title_align']? ' ' . $attrs['title_align'] : '';
+  $tag = isset($attrs['type']) && $attrs['type'] ? $attrs['type'] : 'h3';
+  $tag = $tag == 'page' ? 'h1' : $tag;
+  $text = trim($text) ? $text : (isset($attrs['title']) ? $attrs['title'] : '');
+  $text = '<' . $tag . ' class = "title">' . $text . '</' . $tag . '>';
+  if(isset($attrs['type']) && $attrs['type'] == 'page') {
+    $attrs['class'] .= ' page-header';
+    $output = '<header ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '><div class = "container">' . $text . '</div></header>';
+  }
+  else {
+    $output = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs)  . '>' . $text . '</div>';
+  }
+  return $output;
+}
+
+function progressive_shortcodes_shortcode_title_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>Title:</strong><br/>[title type = "h3" underline = "1"][/title]</p>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_title_settings($attrs, $text) {
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => $text ? $text : (isset($attrs['title']) ? $attrs['title'] : ''),
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $types = array('h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3', 'h4' => 'H4', 'h5' => 'H5', 'h6' => 'H6', 'page' => t('Page Header'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Type'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : 'h2',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['underline'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Underline'),
+    '#default_value' => isset($attrs['underline']) ? $attrs['underline'] : 1,
+  );
+  $aligns = array('' => t('Left'), 'text-center' => t('Center'), 'text-right' => t('Right'));
+  $form['title_align'] = array(
+    '#type' => 'select',
+    '#title' => t('Align'),
+    '#options' => $aligns,
+    '#default_value' => isset($attrs['title_align']) ? $attrs['title_align'] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_sitemap($attrs, $text) {
+  if (isset($attrs['machine_name']) && $attrs['machine_name']) {
+    $menu_tree = menu_tree_all_data($attrs['machine_name']);
+    if($attrs_output = _progressive_shortcodes_shortcode_attributes($attrs)) {
+      return '<div ' . $attrs_output . '>' . _progressive_shortcodes_sitemap($menu_tree, 'sitemap') . '</div>';
+    }
+    return _progressive_shortcodes_sitemap($menu_tree, 'sitemap');
+  }
+  return '';
+}
+
+function _progressive_shortcodes_sitemap($items, $class = '') {
+  $output = '<ul' . ($class ? ' class = "' . $class . '"' : ''). '>';
+  foreach($items as $item) {
+    if($item['link']['hidden'] <> 1) {
+      $output .= '<li>' . l(t($item['link']['link_title']), $item['link']['link_path']);
+      if(!empty($item['below'])) {
+        $output .= _progressive_shortcodes_sitemap($item['below']);
+      }
+      $output .= '</li>';
+    }
+  }
+  return $output . '</ul>';
+}
+
+function progressive_shortcodes_shortcode_sitemap_tip($format, $long) {
+  $output = array();
+  $output[] = '<p><strong>SiteMap:</strong><br/>[sitemap machine_name = "main-menu"][/sitemap]</br>';
+  return implode(' ', $output);
+}
+
+function progressive_shortcodes_shortcode_html($attrs, $text) {
+  // Made a little hack for tables which can't be controled because rendered some WYSIWYG editor, and also list styles
+//  $text = str_replace(array('<table', '<ul>', '<ol>', '|LS|', '|RS|', '|LF|', '|RF|'), array('<table class = "table table-bordered table-striped"', '<ul class = "list">', '<ol class = "list">', '[', ']', '{', '}'), $text);
+  if (isset($attrs['format'])) {
+    $text = check_markup($text, $attrs['format']);
+  }
+  $attrs_output = _progressive_shortcodes_shortcode_attributes($attrs);
+  if($attrs_output) {
+    return '<div ' . $attrs_output . '>' . $text . '</div>';
+  }
+  return $text;
+}
+
+function progressive_shortcodes_shortcode_styledcontainer($attrs, $text) {
+  $attrs['class'] = isset($attrs['class']) ? ' ' . $attrs['class'] : '';
+  $attrs['class'] .= isset($attrs['type']) ? ' ' . $attrs['type'] : '';
+  $attrs['class'] .= isset($attrs['border']) ? ' ' . $attrs['border'] : '';
+  $attrs['class'] .= isset($attrs['shadow']) ? ' ' . $attrs['shadow'] : '';
+  if(isset($attrs['degree']) && $attrs['degree']) {
+    $wrap_attrs = array();
+    foreach(array('-webkit-', '-moz-', '-ms', '-o-', '') as $suffix) {
+      $wrap_attrs['style'] = (isset($attrs['styles']) ? $attrs['styles'] . ' ' : ' ') . $suffix . 'transform: rotate(' . $attrs['degree'] . 'deg);';
+    }
+  }
+  $overlay = isset($attrs['overlay']) && $attrs['overlay'] ? '<div class="overlay"></div>' : '';
+  if(isset($attrs['background_image']) && $attrs['background_image'] && in_array($attrs['background'], array('fixed', 'static', 'paralax', 'blur'))) {
+    $attrs['class'] .= ' full-width-box';
+    if(isset($attrs['background']) && $attrs['background'] == 'static') {
+      $attrs['style_background_image'] = $attrs['background_image'];
+    }
+    if(isset($attrs['background']) && $attrs['background'] == 'fixed') {
+      $inner_attrs = array(
+        'style_background_image' => $attrs['background_image']
+      );
+      $text = '<div class="fwb-bg fwb-' . $attrs['background'] . '" ' . _progressive_shortcodes_shortcode_attributes($inner_attrs) . '>' . $overlay . '</div>' . $text;
+    }
+    if(isset($attrs['background']) && $attrs['background'] == 'paralax') {
+      $inner_attrs = array(
+        'data-speed' => isset($attrs['stellar_background_ratio']) ? $attrs['stellar_background_ratio'] : '2',
+        'style_background_image' => $attrs['background_image']
+      );
+      $text = '<div class="fwb-bg fwb-' . $attrs['background'] . '" ' . _progressive_shortcodes_shortcode_attributes($inner_attrs) . '>' . $overlay . '</div>' . $text;
+    }
+    if(isset($attrs['background']) && $attrs['background'] == 'blur') {
+      $inner_attrs = array(
+        'data-blur-amount' => isset($attrs['blur_amount']) ? $attrs['blur_amount'] : '2',
+        'data-blur-image' => file_create_url(file_load($attrs['background_image'])->uri)
+      );
+      $text = '<div class="fwb-bg fwb-' . $attrs['background'] . '" ' . _progressive_shortcodes_shortcode_attributes($inner_attrs) . '>' . $overlay . '</div>' . $text;
+    }
+  }
+  if(isset($attrs['background']) && $attrs['background'] == 'video' && isset($attrs['video']) && $attrs['video']) {
+    static $video_id = 999;
+    $attrs['class'] = 'full-width-box';
+    $attrs['data-stellar-background-ratio'] = isset($attrs['stellar_background_ratio']) ? $attrs['stellar_background_ratio'] : '0.5';
+    $attrs['id'] = 'wrap-' . ++$video_id;
+    $text = '<a class="player" data-property="{videoURL: \'' . $attrs['video'] . '\', containment:\'#' . $attrs['id'] . '\', autoPlay:true, showControls:true, loop:true, mute:true, startAt:0, opacity:1, addRaster:false}"></a>' . $overlay . $text;
+    drupal_add_js(drupal_get_path('module', 'nikadevs_cms') . '/js/jquery.mb.YTPlayer.js');
+    drupal_add_css(drupal_get_path('module', 'nikadevs_cms') . '/css/YTPlayer.css');
+  }
+  $output = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>' . $text . '</div>';
+  if(isset($wrap_attrs)) {
+    $output = '<div ' . _progressive_shortcodes_shortcode_attributes($wrap_attrs) . '>' . $output . '</div>';
+  }
+  return $output;
+}
+
+function progressive_shortcodes_shortcode_styledcontainer_settings($attrs, $text) {
+  $types = array('content-block' => t('Container'), 'frame-padding' => t('Frame'), '' => t(' - No Paddings - '));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Padding type'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : 'content-block',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+
+  $border = array('' => t(' - None - '), 'frame' => t('Border'), 'frame border-radius' => t('Border with Radius'));
+  $form['border'] = array(
+    '#type' => 'select',
+    '#title' => t('Border'),
+    '#options' => $border,
+    '#default_value' => isset($attrs['border']) ? $attrs['border'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+
+  $shadows = array('' => t(' - None - '), 'frame-shadow' => t('Shadow'), 'frame-shadow-lifted' => t('Shadow Lifted'), 'frame-shadow-raised' => t('Shadow Raised'), 'frame-shadow-curved' => t('Shadow Curved'));
+  $form['shadow'] = array(
+    '#type' => 'select',
+    '#title' => t('Shadow'),
+    '#options' => $shadows,
+    '#default_value' => isset($attrs['shadow']) ? $attrs['shadow'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['degree'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Rotate Degree'),
+    '#default_value' => isset($attrs['degree']) ? $attrs['degree'] : '',
+    '#description' => t('Any degree value, for example: -90'),
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  $bgs = array('' => t(' - None - '), 'static' => t('Static Image'), 'fixed' => t('Fixed'), 'paralax' => t('Parallax'), 'blur' => t('Blurred Image'), 'video' => t('Video'));
+  $form['background'] = array(
+    '#type' => 'select',
+    '#title' => t('Advanced Background'),
+    '#options' => $bgs,
+    '#default_value' => isset($attrs['background']) ? $attrs['background'] : '',
+    '#attributes' => array('class' => array('form-control background-select'))
+  );
+  $form['overlay'] = array(
+    '#type' => 'checkbox' ,
+    '#title' => t('Overlay'),
+    '#default_value' => isset($attrs['overlay']) ? $attrs['overlay'] : '',
+    '#states' => array(
+      'visible' => array(
+        '.background-select, abcd' => array('!value' => ''),
+        '.background-select, abc' => array('!value' => 'static'),
+      ),
+    )
+  );
+  $form['video'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Video URL'),
+    '#default_value' => isset($attrs['video']) ? $attrs['video'] : '',
+    '#states' => array(
+      'visible' => array(
+        '.background-select' => array('value' => 'video'),
+      ),
+    ),
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $filename = isset($attrs['background_image']) && !empty($attrs['background_image']) ? file_load($attrs['background_image'])->uri : '';
+  $image = $filename ? theme('image_style', array('style_name' => 'media_thumbnail', 'path' => $filename)) : '';
+  $form['background_image'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Image'),
+    '#default_value' => isset($attrs['background_image']) ? $attrs['background_image'] : '',
+    '#attributes' => array('class' => array('image-media-upload hidden')),
+    '#field_suffix' => '<div class = "preview-image">' . $image . '</div><a href = "#" class = "media-upload button">' . t('Upload Image') .'</a><a href = "#" class = "media-remove button">' . t('Remove Image') .'</a>',
+    '#states' => array(
+      'visible' => array(
+        '.background-select, abc' => array('!value' => ''),
+        '.background-select, abcd' => array('!value' => 'video'),
+      ),
+    ),
+    '#suffix' => '<div class = "clearfix"></div>'
+  );
+  $form['stellar_background_ratio'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Stellar ratio'),
+    '#default_value' => isset($attrs['stellar_background_ratio']) ? $attrs['stellar_background_ratio'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#states' => array(
+      'visible' => array(
+        '.background-select, ab' => array('!value' => ''),
+        '.background-select, abc' => array('!value' => 'static'),
+        '.background-select, abcd' => array('!value' => 'fixed'),
+        '.background-select, abcde' => array('!value' => 'blur'),
+      ),
+    ),
+    '#description' => t('Default value: 0.5')
+  );
+  $form['blur_amount'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Blur Amount'),
+    '#default_value' => isset($attrs['blur_amount']) ? $attrs['blur_amount'] : '',
+    '#states' => array(
+      'visible' => array(
+        '.background-select' => array('value' => 'blur'),
+      ),
+    ),
+    '#description' => t('Default value: 2')
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_icon($attrs, $text) {
+  $attrs['class'] = isset($attrs['shadow']) ? ' ' . $attrs['shadow'] : '';
+  $text = isset($attrs['title']) && $attrs['title'] ? $attrs['title'] : '';
+  $attrs['link'] = isset($attrs['link']) ? $attrs['link'] : '#';
+  $attrs['href'] = strpos($attrs['link'], '#') === FALSE ? url($attrs['link']) : $attrs['link'];
+  if($attrs['type'] == 'fontawesome') {
+    if(!isset($attrs['style_color'])) {
+      $attrs['style_color'] = '#f89406';
+    }
+    $attrs['class'] = 'icon icon-' . $attrs['fontawesome_size'] . (isset($attrs['class']) ? ' ' . $attrs['class'] : '');
+    $text = '<i class = "' . $attrs['fontawesome_icon'] . '"></i>' . $text;
+    return '<a ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>' . $text . '</a>';
+  }
+  elseif($attrs['type'] == 'livicon') {
+    $attrs['class'] .= 'livicon block';
+    $attrs['class'] .= isset($attrs['livicon_shadow']) && $attrs['livicon_shadow'] ? ' shadowed': '';
+    $text = '<a ' . _progressive_shortcodes_shortcode_attributes($attrs) . ' data-n="' . $attrs['livicon'] . '" data-s="' . $attrs['livicon_size'] . '"
+    ' . (isset($attrs['color_type']) && $attrs['color_type'] && isset($attrs['style_color']) && $attrs['style_color'] ? 'data-c="#' . trim($attrs['style_color'], '#'). '"': '') .
+    (isset($attrs['livicon_type']) && $attrs['livicon_type'] == 'static' ? ' data-a="0"': '') . 
+    (!isset($attrs['livicon_hover']) || !$attrs['livicon_hover'] ? ' data-hc="0"': '') .
+    (isset($attrs['livicon_type']) && $attrs['livicon_type'] == 'click_animation' ? ' data-et="click"': '') . 
+    (isset($attrs['livicon_type']) && $attrs['livicon_type'] == 'click_loop' ? ' data-et="click" data-l = "1"': '') . 
+    (isset($attrs['livicon_parent_trigger']) && $attrs['livicon_parent_trigger'] ? '': ' data-op="0"') . 
+    '></a>' . $text;
+    unset($attrs['style_color']);
+    return $text;
+  }
+}
+
+function progressive_shortcodes_shortcode_icon_settings($attrs, $text) {
+  $form['fontawesome'] = array(
+    '#type' => 'container',
+    '#states' => array(
+      'visible' => array(
+        '.icon-type-select' => array('value' => 'fontawesome')
+      )
+    )
+  );
+  $form['fontawesome']['fontawesome_icon'] = array(
+    '#title' => t('FontAwesome Icon'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'admin/ajax/nd_visualshortcodes/icons_autocomplete/all',
+    '#default_value' => isset($attrs['fontawesome_icon']) ? $attrs['fontawesome_icon'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $sizes = array('24' => '24px', '32' => '32px', '40' => '40px', '60' => '60px', '100' => '100px');
+  $form['fontawesome']['fontawesome_size'] = array(
+    '#title' => t('Font Size'),
+    '#type' => 'select',
+    '#options' => $sizes,
+    '#default_value' => isset($attrs['fontawesome_size']) ? $attrs['fontawesome_size'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+
+  $form['livicon'] = array(
+    '#type' => 'container',
+    '#states' => array(
+      'visible' => array(
+        '.icon-type-select' => array('value' => 'livicon')
+      )
+    )
+  );
+  $form['livicon']['livicon'] = array(
+    '#title' => t('Livicon'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'admin/ajax/progressive_shortcodes/livicons_autocomplete',
+    '#default_value' => isset($attrs['livicon']) ? $attrs['livicon'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-3">',
+  );  
+  $sizes = array('16' => '16px', '24' => '24px', '32' => '32px', '48' => '48px', '56' => '56px', '64' => '64px', '96' => '96px');
+  $form['livicon']['livicon_size'] = array(
+    '#title' => t('Font Size'),
+    '#type' => 'select',
+    '#options' => $sizes,
+    '#default_value' => isset($attrs['livicon_size']) ? $attrs['livicon_size'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-3">',
+  );
+  $types = array('' => t('Animate on hover'), 'static' => t('Static'), 'click_animation' => t('Animate on click'), 'click_loop' => t('Click Start/Stop'));
+  $form['livicon']['livicon_type'] = array(
+    '#title' => t('Type'),
+    '#type' => 'select',
+    '#options' => $types,
+    '#default_value' => isset($attrs['livicon_type']) ? $attrs['livicon_type'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-3">',
+  );
+  $form['livicon']['livicon_hover'] = array(
+    '#title' => t('Hover color effect'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['livicon_hover']) ? $attrs['livicon_hover'] : '',
+    '#prefix' => '</div><div class = "col-sm-3">',
+  );
+  $form['livicon']['livicon_parent_trigger'] = array(
+    '#title' => t('Parent hover'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['livicon_parent_trigger']) ? $attrs['livicon_parent_trigger'] : '',
+  );
+  $form['livicon']['livicon_shadow'] = array(
+    '#title' => t('Shadow'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['livicon_shadow']) ? $attrs['livicon_shadow'] : '',
+    '#suffix' => '</div></div>',
+  );
+
+  $types = array('fontawesome' => t('FontAwesome'), 'livicon' => t('LivIcon'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Icon Type'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : 'fontawesome',
+    '#attributes' => array('class' => array('form-control icon-type-select')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['title'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Title'),
+    '#default_value' => isset($attrs['title']) ? $attrs['title'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  $form['color_type'] = array(
+    '#title' => t('Custom Color'),
+    '#type' => 'checkbox',
+    '#default_value' => isset($attrs['color_type']) ? $attrs['color_type'] : '',
+    '#attributes' => array('class' => array('color-type-select')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+  );
+  $form['style_color'] = array(
+    '#type' => 'textfield' ,
+    '#title' => t('Color'),
+    '#default_value' => isset($attrs['style_color']) ? $attrs['style_color'] : '',
+    '#states' => array(
+      'visible' => array(
+        '.color-type-select' => array('checked' => TRUE),
+      ),
+    ),
+    '#attributes' => array('class' => array('form-control colorpicker-enable')),
+  );
+  $form['link'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link'),
+    '#default_value' => isset($attrs['link']) ? $attrs['link'] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '</div><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_textrotation($attrs, $text) {
+  $attrs['class'] = 'word-rotate ' . (isset($attrs['class']) ? ' ' . $attrs['class'] : '');
+  $words = '';
+  foreach($attrs as $name => $value) {
+    if(strpos($name, 'word_') === 0) {
+      $words .= '<span>' . $value . '</span>';
+    }
+  }
+  $attrs['tag'] = isset($attrs['tag']) ? $attrs['tag'] : 'div';
+  $attrs['prefix'] = isset($attrs['prefix']) ? $attrs['prefix'] : '';
+  $attrs['suffix'] = isset($attrs['title']) ? $attrs['title'] : '';
+  return '<'. $attrs['tag'] .'>'.
+    $attrs['prefix'] . '
+    <span ' . _progressive_shortcodes_shortcode_attributes($attrs) . ' >
+      <span class = "words-box">' . $words . '</span>
+    </span>' . 
+    $attrs['suffix'] . '
+  </'. $attrs['tag'] .'>';
+}
+
+function progressive_shortcodes_shortcode_textrotation_settings($attrs, $text, $form, &$form_state)  {
+  $form['prefix'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Prefix text'),
+    '#default_value' => isset($attrs['prefix']) ? $attrs['prefix'] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Suffix text'),
+    '#default_value' => $text ? $text : (isset($attrs['title']) ? $attrs['title'] : ''),
+    '#attributes' => array('class' => array('form-control'))
+  );
+  $types = array('div' => 'Div', 'p' => 'P', 'strong' => t('Strong'), 'span' => 'Span', 'h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3', 'h4' => 'H4', 'h5' => 'H5', 'h6' => 'H6');
+  $form['tag'] = array(
+    '#type' => 'select',
+    '#title' => t('Tag Type'),
+    '#options' => $types,
+    '#default_value' => isset($attrs['tag']) ? $attrs['tag'] : 'div',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+  $form['words'] = array(
+    '#type' => 'container',
+    '#attributes' => array('id' => array('nd_visualshortcodes_textrotation_words'))
+  );
+  // If AJAX was submited
+  if (isset($form_state['values']['add_new'])) {
+    $attrs = $form_state['values'];
+    foreach($form_state['values'] as $name => $value) {
+      if(strpos($name, 'word_') === 0) {
+        $i = str_replace('word_', '', $name);
+        $form['words']['word_' . $i] = progressive_shortcodes_shortcode_textrotation_item($attrs, $i);
+      }
+    }
+    // Add new row
+    $form['words']['word_' . ++$i] = progressive_shortcodes_shortcode_textrotation_item($attrs, $i);
+  }
+  // Default attrs
+  else {
+    $attrs['word_1'] = isset($attrs['word_1']) ? $attrs['word_1'] : '';
+    foreach($attrs as $name => $value) {
+      if(strpos($name, 'word_') === 0) {
+        $i = str_replace('word_', '', $name);
+        $form['words']['word_' . $i] = progressive_shortcodes_shortcode_textrotation_item($attrs, $i);
+      }
+    }   
+  }
+  $form['add_new'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add new item'),
+    '#submit' => array('progressive_shortcodes_shortcode_ajax_rebuild'),
+    '#ajax' => array(
+      'callback' => 'progressive_shortcodes_shortcode_textrotation_ajax_callback',
+      'wrapper' => 'nd_visualshortcodes_textrotation_words',
+      'effect' => 'fade',
+      'method' => 'replace',
+    )
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_textrotation_item($attrs, $i) {
+  return array(
+    '#title' => t('Phrase ' . $i),
+    '#type' => 'textfield',
+    '#default_value' => isset($attrs['word_' . $i]) ? $attrs['word_' . $i] : '',
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+  );
+}
+
+function progressive_shortcodes_shortcode_ajax_rebuild($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+function progressive_shortcodes_shortcode_textrotation_ajax_callback($form, $form_state) {
+  return $form['shortcode']['settings']['words'];
+}
+
+function progressive_shortcodes_shortcode_chart($attrs, $text) {
+  $output = '';
+
+  switch($attrs['type']) {
+    case t('Simple Line'):
+      $values = array();
+      foreach($attrs as $name => $value) {
+        if(strpos($name, 'chart_value_') === 0) {
+          $values[] = $value;
+        }
+      }
+      $attrs['class'] = 'chart';
+      $attrs['data-line'] = implode(', ', $values);
+      $attrs['data-line-color'] = '#6bdcff';
+      $attrs['data-spot-color'] = '#00c1fd';
+      $attrs['data-min-spot-color'] = '#ff9d00';
+      $attrs['data-max-spot-color'] = '#3e8e00';
+      $output = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>'. t('Loading...'). '</div>';
+      break;
+    case t('Simple Bar'):
+      $values = array();
+      foreach($attrs as $name => $value) {
+        if(strpos($name, 'chart_value_') === 0) {
+          $values[] = $value;
+        }
+      }
+      $attrs['class'] = 'chart';
+      $attrs['data-line'] = implode(', ', $values);
+      $attrs['data-type'] = 'bar';
+      $attrs['data-bar-color'] = 'rgba(255,115,0,.8)';
+      $output = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>'. t('Loading...'). '</div>';
+      break;
+    case t('Bar with Titles'):
+      static $bar_id = 0;
+      $id = 'bar-title-' . (++$bar_id);
+      $values = array();
+      foreach($attrs as $name => $value) {
+        if(strpos($name, 'chart_value_') === 0) {
+          $i = str_replace('chart_value_', '', $name);
+          $values[] = (object)array(
+            'item' => $attrs['chart_item_title_' . $i],
+            'value' => (int)$value
+          );
+        }
+      }
+      $attrs['class'] = 'graph-resize bar-with-title';
+      $attrs['data-values'] = drupal_json_encode($values);
+      $attrs['data-label'] = $attrs['chart_title_value'];
+      $attrs['id'] = $id;
+      $output = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '></div>';
+      break;
+    case t('Donut'):
+      static $donut_id = 0;
+      $id = 'donut-graph-' . (++$donut_id);
+      $values = array();
+      $colors = array();
+      foreach($attrs as $name => $value) {
+        if(strpos($name, 'chart_value_') === 0) {
+          $i = str_replace('chart_value_', '', $name);
+          $values[] = (object)array(
+            'label' => $attrs['chart_item_title_' . $i],
+            'value' => (int)$value
+          );
+          $colors[] = '#' . trim(isset($attrs['chart_item_color_'. $i]) && $attrs['chart_item_color_'. $i] ? $attrs['chart_item_color_'. $i] : '000000', '#');
+          $titles[] = $attrs['chart_item_title_'. $i];
+        }
+      }
+      $attrs['id'] = $id;
+      $attrs['class'] = 'graph-resize donut-graph';
+      $attrs['style'] = 'height: 245px;';
+      $attrs['data-type'] = 'pie';
+      $attrs['data-values'] = drupal_json_encode($values);
+      $attrs['data-colors'] = drupal_json_encode($colors);
+      $output = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>'. t('Loading...'). '</div>';
+      break;
+      break;
+    case t('Pie'):
+      $values = array();
+      $colors = array();
+      foreach($attrs as $name => $value) {
+        if(strpos($name, 'chart_value_') === 0) {
+          $i = str_replace('chart_value_', '', $name);
+          $values[] = $value;
+          $colors[] = '#' . trim(isset($attrs['chart_item_color_'. $i]) && $attrs['chart_item_color_'. $i] ? $attrs['chart_item_color_'. $i] : 'ff9d00', '#');
+        }
+      }
+      $attrs['class'] = 'chart';
+      $attrs['data-line'] = implode(', ', $values);
+      $attrs['data-type'] = 'pie';
+      $attrs['data-slice-colors'] = implode(', ', $colors);
+      $output = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>'. t('Loading...'). '</div>';
+      break;
+    case t('Tristate'):
+      $values = array();
+      foreach($attrs as $name => $value) {
+        if(strpos($name, 'chart_value_') === 0) {
+          $values[] = $value;
+        }
+      }
+      $attrs['class'] = 'chart';
+      $attrs['data-line'] = implode(', ', $values);
+      $attrs['data-type'] = 'tristate';
+      $attrs['data-pos-bar-color'] = '#3e8e00';
+      $output = '<div ' . _progressive_shortcodes_shortcode_attributes($attrs) . '>'. t('Loading...'). '</div>';
+      break;
+  }
+  return $output;
+}
+
+function progressive_shortcodes_shortcode_chart_settings($attrs, $text, $form, &$form_state)  {
+  if(isset($form_state['values'])) {
+    $attrs = $form_state['values'];
+  }
+
+  $attrs['count_items'] = 0;
+  foreach($attrs as $name => $value) {
+    if(strpos($name, 'chart_title_value_') === 0) {
+      $attrs['count_items']++;
+    }
+  }  
+  // Add new item
+  if($form_state['values']['op'] == t('Add new item')) {
+    $attrs['count_items']++; 
+  }
+  $attrs['chart_value_1'] = isset($attrs['chart_value_1']) ? $attrs['chart_value_1'] : '';
+
+  $ajax = array(
+    'callback' => 'progressive_shortcodes_shortcode_chart_ajax_callback',
+    'wrapper' => 'nd_visualshortcodes_chart_items',
+    'effect' => 'fade',
+    'method' => 'replace',
+  );
+  $types = array(t('Simple Line'), t('Simple Bar'), t('Bar with Titles'), t('Donut'), t('Pie'), t('Tristate'));
+  $form['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Type'),
+    '#options' => array_combine($types, $types),
+    '#default_value' => isset($attrs['type']) ? $attrs['type'] : t('Simple Line'),
+    '#attributes' => array('class' => array('form-control')),
+    '#prefix' => '<div class = "row"><div class = "col-sm-6">',
+    '#suffix' => '</div></div>',
+    '#ajax' => $ajax
+  );
+  $form['items'] = array(
+    '#type' => 'container',
+    '#attributes' => array('id' => array('nd_visualshortcodes_chart_items')),
+    '#theme' => 'progressive_shortcodes_shortcode_chart_settings',
+    '#attrs' => $attrs
+  );
+
+  foreach($attrs as $name => $value) {
+    if(strpos($name, 'chart_value_') === 0) {
+      $i = str_replace('chart_value_', '', $name);
+      $form['items'] += progressive_shortcodes_shortcode_chart_item($attrs, $i);
+    }
+  }   
+
+  // Add new row
+  if($form_state['values']['op'] == t('Add new row')) {
+    $form['items'] += progressive_shortcodes_shortcode_chart_item($attrs, ++$i);
+  }
+
+  if($attrs['type'] == t('Bar with Titles')) {
+    $form['items']['chart_title_value'] = array(
+      '#type' => 'textfield',
+      '#default_value' => isset($attrs['chart_title_value']) ? $attrs['chart_title_value'] : '',
+      '#attributes' => array('class' => array('form-control'), 'placeholder' => t('Value Title'))
+    );
+  }
+  if($attrs['type'] == t('Multiple Lines')) {
+    for($i = 1; $i <= $attrs['count_items']; $i++) {
+      $form['items']['chart_title_value_' . $i] = array(
+        '#type' => 'textfield',
+        '#default_value' => isset($attrs['chart_title_value_' . $i]) ? $attrs['chart_title_value_' . $i] : '',
+        '#attributes' => array('class' => array('form-control'), 'placeholder' => t('Value ' . $i . ' Title'))
+      );
+    }
+    $form['add_new_item'] = array(
+      '#type' => 'submit',
+      '#value' => t('Add new item'),
+      '#submit' => array('progressive_shortcodes_shortcode_ajax_rebuild'),
+      '#ajax' => $ajax
+    );
+  }
+  $form['add_new'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add new row'),
+    '#submit' => array('progressive_shortcodes_shortcode_ajax_rebuild'),
+    '#ajax' => $ajax
+  );
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_chart_item($attrs, $i) {
+  $form['chart_value_' . $i] = array(
+    '#type' => 'textfield',
+    '#default_value' => isset($attrs['chart_value_' . $i]) ? $attrs['chart_value_' . $i] : '',
+    '#attributes' => array('class' => array('form-control'))
+  );
+
+  switch($attrs['type']) {
+    case t('Donut'):
+      $form['chart_item_color_' . $i] = array(
+        '#type' => 'textfield',
+        '#default_value' => isset($attrs['chart_item_color_' . $i]) ? $attrs['chart_item_color_' . $i] : '',
+        '#attributes' => array('class' => array('form-control colorpicker-enable')),
+      );
+      // No break, go to next code
+    case t('Bar with Titles'):
+      $form['chart_item_title_' . $i] = array(
+        '#type' => 'textfield',
+        '#default_value' => isset($attrs['chart_item_title_' . $i]) ? $attrs['chart_item_title_' . $i] : '',
+        '#attributes' => array('class' => array('form-control'))
+      );
+      break;
+    case t('Pie'):
+      $form['chart_item_color_' . $i] = array(
+        '#type' => 'textfield',
+        '#default_value' => isset($attrs['chart_item_color_' . $i]) ? $attrs['chart_item_color_' . $i] : '',
+        '#attributes' => array('class' => array('form-control colorpicker-enable')),
+      );
+      break;
+    case t('Multiple Lines'):
+      $form['chart_timeline_' . $i] = array(
+        '#type' => 'textfield',
+        '#default_value' => isset($attrs['chart_timeline_' . $i]) ? $attrs['chart_timeline_' . $i] : '',
+        '#attributes' => array('class' => array('form-control'))
+      );
+
+      for($j = 1; $j <= $attrs['count_items']; $j++) {
+        $form['chart_timeline_' . $j] = array(
+          '#type' => 'textfield',
+          '#default_value' => isset($attrs['chart_item_title_' . $j]) ? $attrs['chart_item_title_' . $j] : '',
+          '#attributes' => array('class' => array('form-control'))
+        );
+      }
+      break;
+  }
+
+  return $form;
+}
+
+function progressive_shortcodes_shortcode_chart_ajax_callback($form, $form_state) {
+  return $form['shortcode']['settings']['items'];
+}
+
+function theme_progressive_shortcodes_shortcode_chart_settings($form) {
+  $type = $form['form']['#attrs']['type'];
+  $output = '';
+  $rows = array();
+
+  switch($type) {
+    case t('Bar with Titles'):
+      $output .= render($form['form']['settings']);
+      $header = array(t('Item Title'), t('Item Value') . render($form['form']['chart_title_value']));
+      foreach (element_children($form['form']) as $key) {
+        if(strpos($key, 'chart_value_') === 0) {
+          $i = str_replace('chart_value_', '', $key);
+          $row = array(
+            render($form['form']['chart_item_title_' . $i]),
+            render($form['form'][$key]),
+          );
+          $rows[] = $row;  
+        }
+      }
+      break;
+    case t('Donut'):
+      $output .= render($form['form']['settings']);
+      $header = array(t('Title'), t('Color'), t('Value %'),);
+      foreach (element_children($form['form']) as $key) {
+        if(strpos($key, 'chart_value_') === 0) {
+          $i = str_replace('chart_value_', '', $key);
+          $row = array(
+            render($form['form']['chart_item_title_' . $i]),
+            render($form['form']['chart_item_color_' . $i]),
+            render($form['form'][$key]),
+          );
+          $rows[] = $row;  
+        }
+      }
+      break;
+    case t('Pie'):
+      $output .= render($form['form']['settings']);
+      $header = array(t('Color'), t('Value'));
+      foreach (element_children($form['form']) as $key) {
+        if(strpos($key, 'chart_value_') === 0) {
+          $i = str_replace('chart_value_', '', $key);
+          $row = array(
+            render($form['form']['chart_item_color_' . $i]),
+            render($form['form'][$key]),
+          );
+          $rows[] = $row;  
+        }
+      }
+      break;
+    case t('Multiple Lines'):
+      $output .= render($form['form']['settings']);
+      $header = array(t('TimeLine'), t('Item Value') . render($form['form']['chart_title_value']));
+      foreach (element_children($form['form']) as $key) {
+        if(strpos($key, 'chart_value_') === 0) {
+          $i = str_replace('chart_value_', '', $key);
+          $row = array(
+            render($form['form']['chart_item_title_' . $i]),
+            render($form['form'][$key]),
+          );
+          $rows[] = $row;  
+        }
+      }
+      break;
+    default:
+      $header = array(t('Values'));
+      foreach (element_children($form['form']) as $key) {
+        if(strpos($key, 'chart_value_') === 0) {
+          $i = str_replace('chart_value_', '', $key);
+          $element = &$form['form'][$key];
+          $row = array(render($element));
+          $rows[] = $row;
+        }
+      }
+      break;
+  }
+
+  $output .= theme('table', array('rows' => $rows, 'header' => $header));
+  return $output;  
+}

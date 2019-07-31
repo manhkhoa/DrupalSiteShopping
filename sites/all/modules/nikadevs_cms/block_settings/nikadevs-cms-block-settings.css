@@ -1,0 +1,30 @@
+.ui-dialog .ui-dialog-content {
+  overflow-x: hidden;
+}
+a.tabledrag-handle .handle{
+  height: auto;
+  width: auto;
+}
+a.tabledrag-handle{
+  width: 40px;
+}
+.block .fa-cog{
+  margin-left: 10px;
+}
+.fa-cog:hover{
+  cursor: pointer;
+  -webkit-animation: spin 2s infinite linear;
+  -moz-animation: spin 2s infinite linear;
+  -o-animation: spin 2s infinite linear;
+  animation: spin 2s infinite linear;
+}
+.form-item label{
+  display: block;
+}
+label.option {
+  display: inline;
+}
+legend{
+  width: auto;
+  font-size: inherit;
+}

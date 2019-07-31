@@ -1,0 +1,2870 @@
+<?php
+/**
+ * @file
+ * progressive_content.features.blockexport_settings.inc
+ */
+
+/**
+ * Implements hook_default_blockexport_settings().
+ */
+function progressive_content_default_blockexport_settings() {
+  $export = array();
+  $export['block'][] = array(
+  'bid' => 1,
+  'module' => 'system',
+  'delta' => 'main',
+  'theme' => 'bartik',
+  'status' => 1,
+  'weight' => 0,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 2,
+  'module' => 'user',
+  'delta' => 'login',
+  'theme' => 'bartik',
+  'status' => 1,
+  'weight' => 0,
+  'region' => 'sidebar_first',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 3,
+  'module' => 'system',
+  'delta' => 'navigation',
+  'theme' => 'bartik',
+  'status' => 1,
+  'weight' => 0,
+  'region' => 'sidebar_first',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 4,
+  'module' => 'system',
+  'delta' => 'management',
+  'theme' => 'bartik',
+  'status' => 1,
+  'weight' => 1,
+  'region' => 'sidebar_first',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 5,
+  'module' => 'system',
+  'delta' => 'help',
+  'theme' => 'bartik',
+  'status' => 1,
+  'weight' => 0,
+  'region' => 'help',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 6,
+  'module' => 'node',
+  'delta' => 'syndicate',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 7,
+  'module' => 'node',
+  'delta' => 'recent',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 8,
+  'module' => 'system',
+  'delta' => 'powered-by',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 10,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 9,
+  'module' => 'system',
+  'delta' => 'user-menu',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 10,
+  'module' => 'system',
+  'delta' => 'main-menu',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 11,
+  'module' => 'user',
+  'delta' => 'new',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 12,
+  'module' => 'user',
+  'delta' => 'online',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 13,
+  'module' => 'menu',
+  'delta' => 'devel',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 14,
+  'module' => 'tb_megamenu',
+  'delta' => 'devel',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 15,
+  'module' => 'tb_megamenu',
+  'delta' => 'main-menu',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 16,
+  'module' => 'tb_megamenu',
+  'delta' => 'management',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 17,
+  'module' => 'tb_megamenu',
+  'delta' => 'navigation',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 18,
+  'module' => 'tb_megamenu',
+  'delta' => 'user-menu',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 19,
+  'module' => 'devel',
+  'delta' => 'execute_php',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 20,
+  'module' => 'devel',
+  'delta' => 'switch_user',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 21,
+  'module' => 'comment',
+  'delta' => 'recent',
+  'theme' => 'bartik',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 22,
+  'module' => 'comment',
+  'delta' => 'recent',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -6,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 23,
+  'module' => 'devel',
+  'delta' => 'execute_php',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -23,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 24,
+  'module' => 'devel',
+  'delta' => 'switch_user',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -1,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 25,
+  'module' => 'menu',
+  'delta' => 'devel',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -24,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 26,
+  'module' => 'node',
+  'delta' => 'recent',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -5,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 27,
+  'module' => 'node',
+  'delta' => 'syndicate',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 28,
+  'module' => 'system',
+  'delta' => 'help',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 1,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 29,
+  'module' => 'system',
+  'delta' => 'main',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -28,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 30,
+  'module' => 'system',
+  'delta' => 'main-menu',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -19,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 31,
+  'module' => 'system',
+  'delta' => 'management',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -18,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 32,
+  'module' => 'system',
+  'delta' => 'navigation',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -16,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 33,
+  'module' => 'system',
+  'delta' => 'powered-by',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -13,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 34,
+  'module' => 'system',
+  'delta' => 'user-menu',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 8,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 35,
+  'module' => 'tb_megamenu',
+  'delta' => 'devel',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 2,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 36,
+  'module' => 'tb_megamenu',
+  'delta' => 'main-menu',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 3,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 37,
+  'module' => 'tb_megamenu',
+  'delta' => 'management',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 4,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 38,
+  'module' => 'tb_megamenu',
+  'delta' => 'navigation',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 5,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 39,
+  'module' => 'tb_megamenu',
+  'delta' => 'user-menu',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 7,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 40,
+  'module' => 'user',
+  'delta' => 'login',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 41,
+  'module' => 'user',
+  'delta' => 'new',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 21,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 42,
+  'module' => 'user',
+  'delta' => 'online',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 22,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 43,
+  'module' => 'search',
+  'delta' => 'form',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -4,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 44,
+  'module' => 'views',
+  'delta' => 'slider_4_cols-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 18,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 45,
+  'module' => 'block',
+  'delta' => 1,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 20,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Who we are',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 46,
+  'module' => 'views',
+  'delta' => 'gallery_row-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 12,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 47,
+  'module' => 'views',
+  'delta' => 'projects-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 17,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 48,
+  'module' => 'block',
+  'delta' => 2,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -3,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Services',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 49,
+  'module' => 'block',
+  'delta' => 3,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -12,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 50,
+  'module' => 'views',
+  'delta' => 'content_slider-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 11,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 51,
+  'module' => 'block',
+  'delta' => 4,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -14,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Open a few toggles at a time',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 52,
+  'module' => 'block',
+  'delta' => 5,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 9,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Video Background',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 53,
+  'module' => 'uc_cart',
+  'delta' => 'cart',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -2,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => 'admin*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 54,
+  'module' => 'views',
+  'delta' => 'products_slider-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 15,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '<none>',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 55,
+  'module' => 'block',
+  'delta' => 6,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -25,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 56,
+  'module' => 'views',
+  'delta' => 'team-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 19,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '<none>',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 57,
+  'module' => 'views',
+  'delta' => 'partners-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 14,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 58,
+  'module' => 'views',
+  'delta' => 'latest_posts-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 13,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 59,
+  'module' => 'block',
+  'delta' => 7,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -22,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Follow Us',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 60,
+  'module' => 'block',
+  'delta' => 8,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -15,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Newsletter Signup',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 61,
+  'module' => 'block',
+  'delta' => 9,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -21,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Information',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 62,
+  'module' => 'block',
+  'delta' => 10,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -17,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'My Account',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 63,
+  'module' => 'progressive_cms',
+  'delta' => 'footer_copyright',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -10,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 8,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 64,
+  'module' => 'md_slider',
+  'delta' => 'homepage',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -20,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 65,
+  'module' => 'progressive_cms',
+  'delta' => 'breadcrumbs',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -11,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 4,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 66,
+  'module' => 'block',
+  'delta' => 11,
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -31,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'node/38
+shop
+shop*',
+  'title' => 'Pages',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 67,
+  'module' => 'menu',
+  'delta' => 'menu-quick-links',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -8,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 68,
+  'module' => 'tb_megamenu',
+  'delta' => 'menu-quick-links',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 6,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 69,
+  'module' => 'progressive_cms',
+  'delta' => 'page_title',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => -9,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 4,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 70,
+  'module' => 'views',
+  'delta' => 'project_slider-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 16,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '<none>',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 71,
+  'module' => 'views',
+  'delta' => 'clients_slider-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 10,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Our Happy Clients',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 72,
+  'module' => 'views',
+  'delta' => 'taxonomy-block',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -28,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'blog
+blog/*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 73,
+  'module' => 'views',
+  'delta' => 'archive-block',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -29,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'blog
+blog/*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 74,
+  'module' => 'views',
+  'delta' => 'taxonomy-block_1',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -30,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'blog
+blog/*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 75,
+  'module' => 'views',
+  'delta' => 'related_projects-block',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -27,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Related Projects',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 76,
+  'module' => 'views',
+  'delta' => 'our_team-block',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -26,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'content/our-team',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 77,
+  'module' => 'views',
+  'delta' => 'our_office_gallery-block',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -25,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'node/68',
+  'title' => 'Our office',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 78,
+  'module' => 'views',
+  'delta' => 'gallery_row-block_1',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 79,
+  'module' => 'views',
+  'delta' => 'product_carousel-block',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => 0,
+  'region' => 'top',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'product-compare',
+  'title' => '<none>',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 80,
+  'module' => 'views',
+  'delta' => 'product_taxonomy-block',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -27,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'shop*
+shop',
+  'title' => 'Manufacturers',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 81,
+  'module' => 'views',
+  'delta' => 'c498eaf8ac8b2cac812941d20cfad7cf',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -25,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'shop
+shop*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 82,
+  'module' => 'views',
+  'delta' => 'c6b667e54c5d547fb934a4afb18e2587',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => -26,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'shop
+shop*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 83,
+  'module' => 'views',
+  'delta' => 'specials_products-block',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => 0,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'shop
+shop*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 84,
+  'module' => 'views',
+  'delta' => 'products_slider-block_1',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => 0,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Related Products',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 85,
+  'module' => 'progressive_cms',
+  'delta' => 'menu',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 86,
+  'module' => 'progressive_cms',
+  'delta' => 'breadcrumbs_line',
+  'theme' => 'progressive',
+  'status' => 1,
+  'weight' => 0,
+  'region' => '',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 8,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 87,
+  'module' => 'block',
+  'delta' => 12,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 88,
+  'module' => 'views',
+  'delta' => 'our_team-block_1',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 89,
+  'module' => 'block',
+  'delta' => 13,
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 90,
+  'module' => 'views',
+  'delta' => 'projects_carousel-block',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 91,
+  'module' => 'views',
+  'delta' => 'projects-block_1',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 92,
+  'module' => 'menu',
+  'delta' => 'features',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 93,
+  'module' => 'tb_megamenu',
+  'delta' => 'features',
+  'theme' => 'progressive',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 94,
+  'module' => 'block',
+  'delta' => 1,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 20,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Who we are',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 95,
+  'module' => 'block',
+  'delta' => 10,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -17,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'My Account',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 96,
+  'module' => 'block',
+  'delta' => 11,
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -31,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'node/38
+shop
+shop*',
+  'title' => 'Pages',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 97,
+  'module' => 'block',
+  'delta' => 12,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 98,
+  'module' => 'block',
+  'delta' => 13,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 99,
+  'module' => 'block',
+  'delta' => 2,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -3,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Services',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 100,
+  'module' => 'block',
+  'delta' => 3,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -12,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 101,
+  'module' => 'block',
+  'delta' => 4,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -14,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Open a few toggles at a time',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 102,
+  'module' => 'block',
+  'delta' => 5,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 9,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Video Background',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 103,
+  'module' => 'block',
+  'delta' => 6,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -25,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 104,
+  'module' => 'block',
+  'delta' => 7,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -22,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Follow Us',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 105,
+  'module' => 'block',
+  'delta' => 8,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -15,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Newsletter Signup',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 106,
+  'module' => 'block',
+  'delta' => 9,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -21,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Information',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 107,
+  'module' => 'comment',
+  'delta' => 'recent',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -6,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 108,
+  'module' => 'devel',
+  'delta' => 'execute_php',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -23,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 109,
+  'module' => 'devel',
+  'delta' => 'switch_user',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -1,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 110,
+  'module' => 'md_slider',
+  'delta' => 'homepage',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -20,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 111,
+  'module' => 'menu',
+  'delta' => 'devel',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -24,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 112,
+  'module' => 'menu',
+  'delta' => 'features',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 113,
+  'module' => 'menu',
+  'delta' => 'menu-quick-links',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -8,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 114,
+  'module' => 'node',
+  'delta' => 'recent',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -5,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 115,
+  'module' => 'node',
+  'delta' => 'syndicate',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 116,
+  'module' => 'progressive_cms',
+  'delta' => 'breadcrumbs',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -11,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 4,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 117,
+  'module' => 'progressive_cms',
+  'delta' => 'breadcrumbs_line',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -39,
+  'region' => 'top',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 8,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 118,
+  'module' => 'progressive_cms',
+  'delta' => 'footer_copyright',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -10,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 8,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 119,
+  'module' => 'progressive_cms',
+  'delta' => 'menu',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 120,
+  'module' => 'progressive_cms',
+  'delta' => 'page_title',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -9,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 4,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 121,
+  'module' => 'search',
+  'delta' => 'form',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -4,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 122,
+  'module' => 'system',
+  'delta' => 'help',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 1,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 123,
+  'module' => 'system',
+  'delta' => 'main',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -28,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 124,
+  'module' => 'system',
+  'delta' => 'main-menu',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -19,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 125,
+  'module' => 'system',
+  'delta' => 'management',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -18,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 126,
+  'module' => 'system',
+  'delta' => 'navigation',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -16,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 127,
+  'module' => 'system',
+  'delta' => 'powered-by',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -13,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 128,
+  'module' => 'system',
+  'delta' => 'user-menu',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 8,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 129,
+  'module' => 'tb_megamenu',
+  'delta' => 'devel',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 2,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 130,
+  'module' => 'tb_megamenu',
+  'delta' => 'features',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 131,
+  'module' => 'tb_megamenu',
+  'delta' => 'main-menu',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 3,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 132,
+  'module' => 'tb_megamenu',
+  'delta' => 'management',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 4,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 133,
+  'module' => 'tb_megamenu',
+  'delta' => 'menu-quick-links',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 6,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 134,
+  'module' => 'tb_megamenu',
+  'delta' => 'navigation',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 5,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 135,
+  'module' => 'tb_megamenu',
+  'delta' => 'user-menu',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 7,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 136,
+  'module' => 'uc_cart',
+  'delta' => 'cart',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -2,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => 'admin*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 137,
+  'module' => 'user',
+  'delta' => 'login',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 138,
+  'module' => 'user',
+  'delta' => 'new',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 21,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => 1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 139,
+  'module' => 'user',
+  'delta' => 'online',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 22,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 140,
+  'module' => 'views',
+  'delta' => 'archive-block',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -29,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'blog
+blog/*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 141,
+  'module' => 'views',
+  'delta' => 'c498eaf8ac8b2cac812941d20cfad7cf',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -25,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'shop
+shop*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 142,
+  'module' => 'views',
+  'delta' => 'c6b667e54c5d547fb934a4afb18e2587',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -26,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'shop
+shop*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 143,
+  'module' => 'views',
+  'delta' => 'clients_slider-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 10,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Our Happy Clients',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 144,
+  'module' => 'views',
+  'delta' => 'content_slider-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 11,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 145,
+  'module' => 'views',
+  'delta' => 'gallery_row-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 12,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 146,
+  'module' => 'views',
+  'delta' => 'gallery_row-block_1',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 147,
+  'module' => 'views',
+  'delta' => 'latest_posts-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 13,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 148,
+  'module' => 'views',
+  'delta' => 'our_office_gallery-block',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -25,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'node/68',
+  'title' => 'Our office',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 149,
+  'module' => 'views',
+  'delta' => 'our_team-block',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -26,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'content/our-team',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 150,
+  'module' => 'views',
+  'delta' => 'our_team-block_1',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 151,
+  'module' => 'views',
+  'delta' => 'partners-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 14,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 152,
+  'module' => 'views',
+  'delta' => 'products_slider-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 15,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '<none>',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 153,
+  'module' => 'views',
+  'delta' => 'products_slider-block_1',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => 0,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Related Products',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 154,
+  'module' => 'views',
+  'delta' => 'product_carousel-block',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -38,
+  'region' => 'top',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'product-compare',
+  'title' => '<none>',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 155,
+  'module' => 'views',
+  'delta' => 'product_taxonomy-block',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -27,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'shop*
+shop',
+  'title' => 'Manufacturers',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 156,
+  'module' => 'views',
+  'delta' => 'projects-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 17,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 157,
+  'module' => 'views',
+  'delta' => 'projects-block_1',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 158,
+  'module' => 'views',
+  'delta' => 'projects_carousel-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 159,
+  'module' => 'views',
+  'delta' => 'project_slider-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 16,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '<none>',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 160,
+  'module' => 'views',
+  'delta' => 'related_projects-block',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -27,
+  'region' => 'content',
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => 'Related Projects',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 161,
+  'module' => 'views',
+  'delta' => 'slider_4_cols-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 18,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 162,
+  'module' => 'views',
+  'delta' => 'specials_products-block',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => 0,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'shop
+shop*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 163,
+  'module' => 'views',
+  'delta' => 'taxonomy-block',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -28,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'blog
+blog/*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 164,
+  'module' => 'views',
+  'delta' => 'taxonomy-block_1',
+  'theme' => 'progressive_sub',
+  'status' => 1,
+  'weight' => -30,
+  'region' => 'sidebar',
+  'custom' => 0,
+  'visibility' => 1,
+  'pages' => 'blog
+blog/*',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 165,
+  'module' => 'views',
+  'delta' => 'team-block',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 19,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '<none>',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 166,
+  'module' => 'md_slider',
+  'delta' => 'one-page',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 167,
+  'module' => 'block',
+  'delta' => 14,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 168,
+  'module' => 'block',
+  'delta' => 15,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 169,
+  'module' => 'block',
+  'delta' => 16,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 170,
+  'module' => 'block',
+  'delta' => 17,
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => 0,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block'][] = array(
+  'bid' => 171,
+  'module' => 'locale',
+  'delta' => 'language',
+  'theme' => 'progressive_sub',
+  'status' => 0,
+  'weight' => -37,
+  'region' => -1,
+  'custom' => 0,
+  'visibility' => 0,
+  'pages' => '',
+  'title' => '',
+  'cache' => -1,
+  'i18n_mode' => 0,
+);
+  $export['block_custom'][] = array(
+  'bid' => 1,
+  'body' => '[row]
+  [col tablet = 6 desktop = 6]
+    <p class="lead"><strong>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis minus pariatur eligendi sunt doloremque vitae reiciendis tempore voluptatibus quis architecto suscipit magnam.</strong></p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Repudiandae odit iste exercitationem praesentium deleniti nostrum laborum rem id nihil tempora. Adipisci ea commodi unde nam placeat cupiditate quasi a ducimus rem consequuntur ex eligendi minima voluptatem assumenda voluptas quidem sit maiores odio velit voluptate.</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Facilis dolorum mollitia debitis numquam itaque facere culpa harum natus amet alias dolor repudiandae repellendus distinctio aliquid placeat perspiciatis quaerat beatae vero?</p>
+    [button link = "#"]Read More[/button]
+  [/col]
+
+  [col tablet = 6 desktop = 6]
+    [progress percent = "80" color = "blue" class = "border-radius hover"]Web Design[/progress]
+    [progress percent = "70" color = "green" class = "border-radius hover"]HTML/CSS[/progress]
+    [progress percent = "40" color = "blue" class = "border-radius hover"]Opencart[/progress]
+    [progress percent = "90" color = "orange" class = "border-radius hover"]Graphic Design[/progress]
+    [progress percent = "58" color = "red" class = "border-radius hover"]Wordpress[/progress]
+  [/col]
+
+  [spacer class = "xxl"][/spacer]
+[/row]',
+  'info' => 'Who we are',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 2,
+  'body' => '[row]
+  [col tablet = 4 desktop = 4]
+    [service_box link = "contact" title = "Web Design" icon = "fa fa-picture-o" inner_animation = "bounceInLeft"]Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat.[/service_box]
+  [/col]
+  [col tablet = 4 desktop = 4]
+    [service_box link = "contact" title = "Graphic Design" icon = "fa fa-wrench" inner_animation = "bounceInUp"]The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those intereste. It is a long established fact that a reader.[/service_box]
+  [/col]
+  [col tablet = 4 desktop = 4]
+    [service_box link = "contact" title = "Internet Marketing" icon = "fa fa-bug" inner_animation = "bounceInRight"]The readable content of a page when looking at its layout. The point of using. Duis aute irure dolor reprehenderit in voluptate velit esse cillum.[/service_box]
+  [/col]
+[/row]',
+  'info' => 'Services',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 3,
+  'body' => '[container]
+  [row]
+    [col desktop = 6 wide = 3]
+      [pricing_table title = "First Package" price = "$199" price_top_text = "Starting at" price_text = "/month" link = "shop" button = "Buy Now" livicon = "shopping-cart" stars = 3 read_more = "Read More" color = "orange"]
+        [pricing_table_row disabled = "1" check = "1" title = "Responsive Design"][/pricing_table_row]
+        [pricing_table_row check = "1" title = "Styled elements"][/pricing_table_row]
+        [pricing_table_row disabled = "1" check = "1" title = "Easy Setup"][/pricing_table_row]
+      [/pricing_table]
+    [/col]
+    [col desktop = 6 wide = 3]
+      [pricing_table title = "Second Package" price = "$299" price_top_text = "Starting at" price_text = "/month" link = "shop" button = "Buy Now" livicon = "wrench" stars = 4 color = "blue" read_more = "Read More"]
+        [pricing_table_row disabled = "1" check = "1" title = "Responsive Design"][/pricing_table_row]
+        [pricing_table_row check = "1" title = "Styled elements"][/pricing_table_row]
+        [pricing_table_row disabled = "1" check = "1" title = "Easy Setup"][/pricing_table_row]
+      [/pricing_table]
+    [/col]
+    [col desktop = 6 wide = 3]
+      [pricing_table title = "Third Package" price = "$399" price_top_text = "Starting at" price_text = "/month" link = "shop" button = "Buy Now" livicon = "piggybank" stars = 4 color = "green" read_more = "Read More"]
+        [pricing_table_row check = "1" title = "Responsive Design"][/pricing_table_row]
+        [pricing_table_row check = "1" title = "Styled elements"][/pricing_table_row]
+        [pricing_table_row disabled = "1" check = "1" title = "Easy Setup"][/pricing_table_row]
+      [/pricing_table]
+    [/col]
+    [col desktop = 6 wide = 3]
+      [pricing_table title = "Fourth Package" price = "$499" price_top_text = "Starting at" price_text = "/month" link = "shop" button = "Buy Now" livicon = "key" stars = 5 color = "red" read_more = "Read More"]
+        [pricing_table_row check = "1" title = "Responsive Design"][/pricing_table_row]
+        [pricing_table_row check = "1" title = "Styled elements"][/pricing_table_row]
+        [pricing_table_row check = "1" title = "Easy Setup"][/pricing_table_row]
+      [/pricing_table]
+    [/col]
+  [/row]
+[/container]',
+  'info' => 'Pricing Packages',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 4,
+  'body' => '[accordions multi_collapse = "1" ]
+  [accordion title = "Portfolio Pages" active]
+    <img src="/sites/all/themes/progressive/img/animations.png" class="alignright" width="100" height="62" alt="">
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolores ipsa esse obcaecati repudiandae veniam amet modi recusandae optio earum sequi accusantium culpa vitae iste sit commodi eaque voluptatem officia quam.
+  [/accordion]
+  [accordion title = "Gallery Pages" active]
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque natus quaerat voluptate? Asperiores hic dolore voluptate corporis obcaecati reiciendis sunt ipsam iste. Eligendi inventore voluptatibus quia saepe odit deserunt nam?
+  [/accordion]
+  [accordion title = "Styles Pages"]
+    <img src="/sites/all/themes/progressive/img/animations.png" class="alignleft" width="100" height="62" alt="">
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolores ipsa esse obcaecati repudiandae veniam amet modi recusandae optio earum sequi accusantium culpa vitae iste sit commodi eaque voluptatem officia quam. Molestiae nobis quidem atque explicabo eum facilis libero porro in fugiat pariatur molestias maiores voluptates rerum ipsa architecto quae assumenda harum fuga modi accusantium nihil dolor consequatur totam commodi quam quas neque dolorem veritatis unde adipisci ad illo excepturi quia facere reprehenderit non alias cum minima labore quo repudiandae perferendis?
+  [/accordion]
+  [accordion title = "Shop Pages"]
+    <img src="/sites/all/themes/progressive/img/animations.png" class="alignleft" width="100" height="62" alt="">
+    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolores ipsa esse obcaecati repudiandae veniam amet modi recusandae optio earum sequi accusantium culpa vitae iste sit commodi eaque voluptatem officia quam. Molestiae nobis quidem atque explicabo eum facilis libero porro in fugiat pariatur molestias maiores voluptates rerum ipsa architecto quae assumenda harum fuga modi accusantium nihil dolor consequatur totam commodi quam quas neque dolorem veritatis unde adipisci ad illo excepturi quia facere reprehenderit non alias cum minima labore quo repudiandae perferendis?
+  [/accordion]
+[/accordions]
+',
+  'info' => 'Open a few toggles at a time',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 5,
+  'body' => '<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Itaque quisquam aperiam necessitatibus id consequuntur quidem praesentium laboriosam repellendus modi fugiat aliquam quam minus mollitia eveniet sapiente perferendis voluptatibus ad rem? Id nesciunt alias neque non illum facilis nobis cupiditate ullam corrupti nisi esse cum tempore tempora praesentium soluta autem vitae!</p>
+[button link = "contact"]Read More[/button]',
+  'info' => 'Video Background',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 6,
+  'body' => '[styledcontainer type="content-block" border="frame" overlay="0" different_values="0" text_align="center"]
+[html format="ckeditor" different_values="0"]<p><span style="font-size:16px;">Welcome to our site. There are many variations alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. Donec pharetra, lectus nec dignissim pharetra quis libero.</span></p>[/html]
+[button color_type="0" color="btn-danger" type="default" text="Read More" different_values="0"]
+[/button]
+[button color_type="0" color="btn-danger" type="default" text="Join Now" different_values="0"]
+[/button]
+[/styledcontainer]',
+  'info' => 'Call to Action Home Creative',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 7,
+  'body' => '[html]<p>Follow us in social media</p>[/html]
+[social_box icon="icon-facebook" link="http://facebook.com" different_values="0"]
+[/social_box]
+[social_box icon="icon-twitter" link="http://facebook.com"]
+[/social_box]
+[social_box icon="icon-gplus" link="http://facebook.com"]
+[/social_box]
+[social_box icon="icon-linkedin" link="http://facebook.com"]
+[/social_box]
+ ',
+  'info' => 'Follow Us',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 8,
+  'body' => '[node admin_url = "node/37/edit"][/node]',
+  'info' => 'Newsletter Signup',
+  'format' => 'dynamic_shortcodes',
+);
+  $export['block_custom'][] = array(
+  'bid' => 9,
+  'body' => '<nav>
+  <ul>
+    <li><a href="#">About us</a></li>
+    <li><a href="#">Privacy Policy</a></li>
+    <li><a href="#">Terms &amp; Condotions</a></li>
+    <li><a href="#">Secure payment</a></li>
+  </ul>
+</nav>',
+  'info' => 'Information',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 10,
+  'body' => '<nav>
+  <ul>
+    <li><a href="#">My account</a></li>
+    <li><a href="#">Order History</a></li>
+    <li><a href="#">Wish List</a></li>
+    <li><a href="#">Newsletter</a></li>
+  </ul>
+</nav>',
+  'info' => 'My Account',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 11,
+  'body' => '[quicklinks machine_name = "menu-quick-links"][/quicklinks]',
+  'info' => 'Quick Links: Pages',
+  'format' => 'dynamic_shortcodes',
+);
+  $export['block_custom'][] = array(
+  'bid' => 12,
+  'body' => '<div class="promo-block">
+  <a href="#">
+    <img src="/sites/all/themes/progressive/img/content/megamenu-big.png" width="253" height="457" alt="">
+  </a>
+</div>',
+  'info' => 'MegaMenu New Iphone',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 13,
+  'body' => '[html format="ckeditor" different_values="0"]<p><img alt="" src="/sites/progressive.nikadevs.com/files/menu-elements.png" style="width: 240px; height: 329px;"></p>[/html]
+ ',
+  'info' => 'Megamenu 200+ Items',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 14,
+  'body' => '[styledcontainer type="content-block" background="paralax" overlay="0" background_image="52" stellar_background_ratio="0.5" different_values="0" style_padding_bottom="30"]
+[title title="Team" type="page" underline="1" different_values="0" extra_classes="white" style_margin_top="80" style_margin_bottom="50"]
+[/title]
+[container different_values="0"]
+[block admin_url="admin/structure/block/manage/views/our_team-block_1/configure" different_values="0"]
+[/block]
+[/container]
+[/styledcontainer]
+ ',
+  'info' => 'One Page Team',
+  'format' => 'dynamic_shortcodes',
+);
+  $export['block_custom'][] = array(
+  'bid' => 15,
+  'body' => '[title title="Works" type="page" underline="1" different_values="0"]
+[/title]
+[block admin_url="admin/structure/block/manage/views/projects-block_1/configure" different_values="0" extra_classes="black" style_padding_top="40"]
+[/block]
+ ',
+  'info' => 'One Page Works',
+  'format' => 'dynamic_shortcodes',
+);
+  $export['block_custom'][] = array(
+  'bid' => 16,
+  'body' => '[styledcontainer type="content-block" background="blur" overlay="1" background_image="150" blur_amount="2" different_values="0" style_padding_top="80"]
+[title title="Services" type="page" underline="1" different_values="0" extra_classes="white"]
+[/title]
+[container different_values="0" style_padding_top="40" style_padding_bottom="60"]
+[row extra_classes="white" different_values="0"]
+[col tablet="4" desktop="4"]
+[service_box link="contact" title="Web Design" icon="fa fa-picture-o" inner_animation="bounceInLeft"]
+[html]Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat.[/html]
+[/service_box]
+[/col]
+[col tablet="4" desktop="4"]
+[service_box link="contact" title="Graphic Design" icon="fa fa-wrench" inner_animation="bounceInUp"]
+[html]The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those intereste. It is a long established fact that a reader.[/html]
+[/service_box]
+[/col]
+[col tablet="4" desktop="4"]
+[service_box link="contact" title="Internet Marketing" icon="fa fa-bug" inner_animation="bounceInRight"]
+[html]The readable content of a page when looking at its layout. The point of using. Duis aute irure dolor reprehenderit in voluptate velit esse cillum.[/html]
+[/service_box]
+[/col]
+[/row]
+[/container]
+[/styledcontainer]
+ ',
+  'info' => 'One Page Services',
+  'format' => 'html',
+);
+  $export['block_custom'][] = array(
+  'bid' => 17,
+  'body' => '[title title="Contact Us" type="page" underline="1" different_values="0"]
+[/title]
+[container style_padding_top="50" different_values="0"]
+[row]
+[col tablet="6" desktop="6" style_padding_bottom="26" different_values="0" extra_classes="contact-info"]
+[html]<address> <div class="title">Address</div> 49 Archdale, 2B Charleston, New York City, USA </address>[/html]
+[row]
+[html]<address class="col-sm-6 col-md-6"> <div class="title">Phones</div> <div>Support: +777 (100) 1234</div> <div>Sales manager: +777 (100) 4321</div> <div>Director: +777 (100) 1243</div> </address> <address class="col-sm-6 col-md-6"> <div class="title">Email Addresses</div> <div>Support: <a href="mailto:support@example.com">support@example.com</a></div> <div>Sales manager: <a href="mailto:manager@example.com">manager@example.com</a></div> <div>Director: <a href="mailto:chief@example.com">chief@example.com</a></div> </address>[/html]
+[/row]
+[html]<hr> <p>Fusce odio ante, consectetur nec dictum at, cursus congue orci. Donec vel tellus eget massa lacinia pulvinar ut eu lectus. Quisque elit augue, gravida sit amet egestas quis, vehicula nec magna. Vivamus nec nulla magna, et fringilla arcu. Sed ac quam at elit feugiat semper eu at nulla. Morbi vel urna non massa faucibus mollis.</p> <p>Phasellus vulputate, lectus eu consequat scelerisque, felis odio consequat enim, ut vulputate elit lacus nec ipsum. Vivamus non sollicitudin eros. Nunc ut pulvinar felis. Ut lectus orci, cursus ac semper nec, lobortis nec urna. </p>[/html]
+[/col]
+[col tablet="6" desktop="6"]
+[contact name="Name:" message="Comment:" mail="Email Address:" title="Quick Contact" subject="Telephone:" email="em" different_values="0"]
+[/contact]
+[/col]
+[/row]
+[/container]
+ ',
+  'info' => 'One Page Contact Us',
+  'format' => 'dynamic_shortcodes',
+);
+  $export['block_node_type'][] = array(
+  'module' => 'views',
+  'delta' => 'products_slider-block_1',
+  'type' => 'product',
+);
+  $export['block_node_type'][] = array(
+  'module' => 'views',
+  'delta' => 'related_projects-block',
+  'type' => 'project',
+);
+return $export;
+}
